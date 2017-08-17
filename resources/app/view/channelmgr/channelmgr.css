@@ -1,0 +1,52 @@
+
+/* css for sample app view */
+#ov-channelmgr {
+    padding: 20px;
+}
+.light #ov-channelmgr {
+    color: navy;
+}
+.dark #ov-channelmgr {
+    color: #88f;
+}
+#ov-channelmgr .button-panel {
+    margin: 10px;
+    width: 200px;
+}
+.light #ov-channelmgr .button-panel {
+    background-color: #ccf;
+}
+.dark #ov-channelmgr .button-panel {
+    background-color: #444;
+}
+
+#ov-channelmgr .my-button {
+    cursor: pointer;
+    padding: 4px;
+    text-align: center;
+}
+
+.light #ov-channelmgr .my-button {
+    color: white;
+    background-color: #99d;
+}
+.dark #ov-channelmgr .my-button {
+    color: black;
+    background-color: #aaa;
+}
+#ov-channelmgr .number {
+    font-size: 140%;
+    text-align: right;
+}
+#ov-channelmgr .quote {
+    margin: 10px 20px;
+    font-style: italic;
+}
+
+#ov-cluster h2 {
+    display: inline-block;
+}
+
+#ov-cluster div.ctrl-btns {
+    width: 45px;
+}

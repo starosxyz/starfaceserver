@@ -1,0 +1,52 @@
+
+/* css for sample app view */
+#ov-clientmgr {
+    padding: 20px;
+}
+.light #ov-clientmgr {
+    color: navy;
+}
+.dark #ov-clientmgr {
+    color: #88f;
+}
+#ov-clientmgr .button-panel {
+    margin: 10px;
+    width: 200px;
+}
+.light #ov-clientmgr .button-panel {
+    background-color: #ccf;
+}
+.dark #ov-clientmgr .button-panel {
+    background-color: #444;
+}
+
+#ov-clientmgr .my-button {
+    cursor: pointer;
+    padding: 4px;
+    text-align: center;
+}
+
+.light #ov-clientmgr .my-button {
+    color: white;
+    background-color: #99d;
+}
+.dark #ov-clientmgr .my-button {
+    color: black;
+    background-color: #aaa;
+}
+#ov-clientmgr .number {
+    font-size: 140%;
+    text-align: right;
+}
+#ov-clientmgr .quote {
+    margin: 10px 20px;
+    font-style: italic;
+}
+
+#ov-cluster h2 {
+    display: inline-block;
+}
+
+#ov-cluster div.ctrl-btns {
+    width: 45px;
+}

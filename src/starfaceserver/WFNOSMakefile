@@ -1,0 +1,23 @@
+#you can use static_libs=1/0 ,to build static lib or dynamiclib
+include $(USER_ROOT)/make/makeinclude/macros.GNU
+MYBIN=STARFACESERVER
+MYFILES = \
+CController.cpp\
+CControllerManager.cpp\
+CSession.cpp\
+CSessionManager.cpp\
+CStarfaceProcess.cpp\
+CStarfaceServer.cpp\
+CStarfaceWebClient.cpp\
+CWebServerChannel.cpp\
+CWebServerChannelManager.cpp\
+CStarfaceWebClientManager.cpp\
+CFileObject.cpp\
+CBackupTransportSink.cpp\
+starfaceserver.cpp
+
+MYCPPFLAGS=
+MYLDFLAGS= 
+MYDLLLIB= 
+include $(USER_ROOT)/make/makeinclude/allinone.GNU
+

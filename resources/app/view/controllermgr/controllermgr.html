@@ -1,0 +1,62 @@
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="box">
+				<!-- /.box-header -->
+				<div class="box-header">
+					<h3 class="box-title">控制器管理</h3>				
+					<a href="javascript:void(0);" ng-click="DeleteData()" class="btn btn-warning" style="width:80px;height:30px;float:right;margin:10px 5px 15px 20px">删除控制器</a>
+					<button  data-toggle="modal" data-target="#myModal" class="btn btn-info" style="width:80px;height:30px;float:right;margin:10px 5px 15px 20px">新建控制器</button>
+					<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+										&times;
+									</button>
+									<h4 class="modal-title" id="myModalLabel">
+										新建控制器管理
+									</h4>
+								</div>
+								<div class="modal-body">
+									<table>
+										<tr ><td style="padding-bottom:30px">控制器地址:</td><td style="padding-bottom:30px"><input type="text" class="input-xlarge" id="controllerip"  maxlength="50" ng-model="data.controllerip"></th></tr>
+										<tr ><td style="padding-bottom:30px">控制器端口:</td><td style="padding-bottom:30px"><input type="text" class="input-xlarge" id="controllerport" maxlength="50" ng-model="data.controllerport"></th></tr>
+										<tr ><td style="padding-bottom:30px" >控制器用户名:</td><td style="padding-bottom:30px"><input type="text" class="input-xlarge" id="controllerusername" maxlength="50" ng-model="data.controllerusername"></th></tr>
+										<tr ><td style="padding-bottom:30px">控制器密码:</td><td style="padding-bottom:30px"><input type="text" class="input-xlarge"id="controllerpassword" maxlength="50" ng-model="data.controllerpassword"></th></tr>
+									</table>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-primary" ng-click="PostData()" data-dismiss="modal">提交</button>
+									<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.box-header -->
+				<!-- /.box-body -->
+				<div class="box-body">
+					<table id="table_list" class="table table-bordered table-hover">
+						<tr>
+							<th>选择</th>
+							<th>控制器地址</th>
+							<th>控制器端口</th>
+							<th>控制器用户名</th>
+							<th>控制器密码</th>
+							<th>ONOS GUI地址</th>
+						</tr>
+						<tr ng-repeat="controlmg in data.controlmgs">
+							<td><input type='radio' id='checking' name='checking' class='select_btn fl' value='{{controlmg.controllerid}}' /></td>
+							<td>{{controlmg.controllerip}}</td>
+							<td>{{controlmg.controllerport}}</td>
+							<td>{{controlmg.controllerusername}}</td>
+							<td>{{controlmg.controllerpassword}}</td>
+							<td><a href="{{controlmg.controllerurl}}" target="_blank">{{controlmg.controllerurl}}</a></td>
+						</tr>
+					</table>
+				</div>
+				<!-- /.box-body -->
+			</div>
+		</div>
+	</div>

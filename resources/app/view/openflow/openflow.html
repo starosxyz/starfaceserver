@@ -1,0 +1,17 @@
+<table id="table_list" class="table table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>客户端地址</th>
+			<th>客户端端口</th>
+			<th>控制器地址</th>
+			<th>控制器端口</th>
+		</tr>
+	</thead>
+	<tr ng-repeat="openflow in data.openflows">
+		<td>{{openflow.clientip}}</td>
+		<td>{{openflow.clientport}}</td>
+		<td>{{openflow.controllerip}}</td>
+		<td>{{openflow.controllerport}}</td>
+	</tr>
+</table>
+			

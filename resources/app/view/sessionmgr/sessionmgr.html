@@ -1,0 +1,16 @@
+<table class="table table-striped table-bordered table-condensed">
+	<thead>
+		<tr>
+			<th>SessionId</th>
+			<th>Client</th>
+			<th>Expire</th>
+			<th>UserNmae</th>
+		</tr>
+	</thead>
+	<tr ng-repeat="session in data.sessions">
+		<td>{{session.sessionid}}</td>
+		<td>{{session.clientip}}</td>
+		<td>{{session.expire}}</td>
+		<td>{{session.username}}</td>
+	</tr>
+</table>

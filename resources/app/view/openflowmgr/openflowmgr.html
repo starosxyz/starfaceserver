@@ -1,0 +1,40 @@
+<div class="row">
+	<div class="col-md-4">
+		<div class="box">
+			<!-- /.box-header -->
+			<div class="box-header">
+				<h3 class="box-title">openflow监听配置</h3>
+			</div>
+			<br>
+			<div class="box-body">
+				<form id="openflowinfo">
+					<fieldset>
+						<div class="control-group">
+							<label class="control-label" for="openflowip">openflow监听地址</label>
+							<div class="controls">
+								<input type="text" class="input-xlarge" id="openflowip" ng-model="data.openflowip" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="openflowport">openflow监听端口</label>
+							<div class="controls">
+								<input type="text" class="input-xlarge" id="openflowport" ng-model="data.openflowport" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="controlerip">openflow传输协议</label><br>
+							<select id="openflowtype" style="height: 26px;width: 174px;">
+								<option value="{{default_value}}" selected="selected">{{default_value}}</option>
+								<option ng-repeat="protocoltypes in protocoltype_array" value='{{protocoltypes}}'>{{protocoltypes}}</option>
+							</select>
+						</div>
+						<label class="control-label" for="controlerport">返回值：{{data.result}}</label>
+						<div class="form-actions">
+							<input type="submit" class="btn btn-success btn-large" ng-click="ConfigData()" value="提交" />
+						</div>	
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

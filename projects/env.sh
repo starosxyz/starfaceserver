@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Copyright (C) 2013-2014, Nanjing StarOS Technology Co., Ltd
+#
+CURRENT=`pwd`
+export ROOTDIR=$CURRENT/../
+
+export USER_ROOT=$CURRENT/../
+
+export BUILD_NUMBER=1
+
+export STARFACESERVER_VERSION="1.2.2"
+
+export STARFACESERVER_STAGE_ROOT=/tmp
+export STARFACESERVER_RPM_ROOT=$STARFACESERVER_STAGE_ROOT/rpm
+export STARFACESERVER_RPM_VERSION=${STARFACESERVER_VERSION//-/.}
+export STARFACESERVER_STAGE=$CURRENT/starfaceserver
+
+
+
+
