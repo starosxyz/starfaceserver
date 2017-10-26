@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--StarOS Entry-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+
+	<include src="/opt/staros.xyz/starfaceserver/starlang/starfaceserverhttp.xml"/>
+	<!--qiulei 20170811-->
+
+	<include src="/opt/staros.xyz/starfaceserver/starlang/CSessionManager.xml"/>
+
+
+
+	<object name="gSettingsManager" global="true"/>
+	<object name="WebSocketManager" global="true"/>
+
+	<object name="SessionManager" global="true"/>
+	<object name="restfulserver"  global="true"/>
+	<logconfig dest="stdout" level="9" filename="/opt/staros.xyz/starfaceserver/logs/starosapps.log" logturnoff="false"/>
+	<boolean name="isAPIAuth"  value="false"/>
+	<!--<object name="WebsocketForTest"/>-->
+	<function name="Restfulserver">
+		<params name="restfulparams"/>
+		<!--hu peng 2017/07/28-->
+		<set name="restfulparams" paramname="listenip" value="'0.0.0.0'"/>
+		<set name="restfulparams" paramname="listenport" value="'9922'"/>
+		<set name="restfulparams" paramname="protocol" value="'http'"/>
+		<set name="restfulparams" paramname="cerfile" value="'/opt/staros.xyz/starcore/system/servercert.pem'"/>
+		<set name="restfulparams" paramname="keyfile" value="'/opt/staros.xyz/starcore/system/serverkey.pem'"/>
+		<log>Restfulserver</log>
+		<restful name="restfulserver" action="SERVER" param="restfulparams" expectevent="restfulrequest.event"/>
+	</function>
+	<events>
+		<!--Session StarUp-->
+		<onevent event="bundleapp.startup">
+			<long name="calloutSession" />
+			<string name="outjson"/>
+			<string name="injson" />
+			<!--qiulei 20170828 Monday-->
+			<string name="eventname"/>
+			<function>
+				<log level="10">##########Starfaceserver start#######</log>
+
+				<!--Start GUI and Restful API Service-->
+				<new name="SessionManager" class="CSessionManager"/>
+				<function name="Restfulserver"/>
+				<set name="eventname"  value="'TimeOutEvent'"/>
+				<!--raise name="context.eventname.toString()"/-->
+				<timer method="StartTimer" event="TimeOutEvent" timeout="'2000'"/>
+
+			</function>
+		</onevent>
+		<!--Session Shutdown-->
+		<onevent event="~bundleapp.shutdown">
+			<function>
+				<log level="10">##########~bundleapp.shutdown#######</log>
+
+			</function>
+		</onevent>
+
+		<!--qiulei 20170828 Monday-->
+		<onevent event="TimeOutEvent">
+			<function >
+				<log level="10">staros TimeOutEvent 2017.08.28</log>
+				<function name="Timeout" class="SessionManager"/>
+				<!--wait event="InvalidEvent" timeout="2000"/-->
+				<!--raise name="'TimeOutEvent'"/-->
+			</function>
+		</onevent>
+	</events>
+</starlang>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<class name="CSession">
+		<private>
+			<string name="m_cseeionid"  />
+			<string name="m_username"  />
+			<long name="m_current"  />
+		</private>
+		<public>
+			<!-- hu 20170904 create Session and add data-->
+			<function name="CSession">
+				<parameters>
+					<string name="sessionid"/>
+					<string name="username"/>
+				</parameters>
+				<log>new CSession</log>
+				<log><![CDATA[sessionid=<%=context.sessionid.toString()%>']]></log>
+				<log><![CDATA[username=<%=context.username.toString()%>']]></log>
+				<set name="thisclass.m_cseeionid" value="context.sessionid.toString()"/>
+				<set name="thisclass.m_username" value="context.username.toString()"/>
+				<script><![CDATA[
+					function getNowFormatDate() {
+						var date = new Date();
+						var seperator1 = "-";
+						var seperator2 = ":";
+						var month = date.getMonth() + 1;
+						var strDate = date.getDate();
+						if (month >= 1 && month <= 9) {
+							month = "0" + month;
+						}
+						if (strDate >= 0 && strDate <= 9) {
+							strDate = "0" + strDate;
+						}
+						var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+								+ " " + date.getHours() + seperator2 + date.getMinutes()
+								+ seperator2 + date.getSeconds();
+						return currentdate;
+					}
+					function getCurrentTimerInMs() {
+						var timestamp=new Date().getTime();
+						return timestamp;
+					}
+					
+					context.m_current.setValue(getCurrentTimerInMs());
+				]]></script>
+			</function>
+			<!-- hu 20170904 resettime to now time-->
+			<function name="ResetTime">
+				<script><![CDATA[
+					function getCurrentTimerInMs() {
+						var timestamp=new Date().getTime();
+						return timestamp;
+					}
+					
+					context.m_current.setValue(getCurrentTimerInMs());
+				]]></script>
+			</function>
+			<function name="Gettime">
+				<parameters>
+					<long name="time" />
+				</parameters>
+				<set name="time" value="thisclass.m_current.toLong()"/>
+			</function>
+			
+			<function name="GetUsername">
+				<parameters>
+					<string name="username"/>
+				</parameters>
+				<set name="username" value="thisclass.m_username.toString()"/>
+			</function>
+			
+			
+			
+		</public>
+	</class>
+	<class name="CSessionManager">
+		<private>
+			<hashmap name="SessionContainer"  keytype="string" valuetype="object"/>
+		</private>
+		<public>
+			<function name="CreateSession">
+				<parameters>
+					<string name="sessionid" />
+					<string name="username" />
+				</parameters>
+				<object name="session"/>	
+			    <log>CreateSession</log>
+				<if cond="context.session.getValue()==null">
+					<then>
+						<log>CreateSession1</log>
+					</then>
+				</if>
+				<if cond="thisclass.SessionContainer.hasValue(context.sessionid.toString())==false">
+					<then>
+						<new name="session" class="CSession">
+							<parameters>
+								<string name="sessionid"  in="context.sessionid.toString()"/>
+								<string name="username"  in="context.username.toString()"/>
+							</parameters>
+						</new>
+						<if cond="context.session.getValue()!=null">
+							<then>
+								<log>new session ok</log>
+								<insert name="SessionContainer" key="context.sessionid.toString()" value="context.session"/>
+							</then>
+							<else>
+								<log>new session failure..................</log>
+							</else>
+						</if>
+					</then>
+					<else>
+						<exit/>
+					</else>
+				</if>
+			</function>
+		
+			<function name="RemoveSession">
+					<parameters>
+						<string name="sessionid" />
+					</parameters>
+					<remove name="SessionContainer" key="context.sessionid.toString()"/>
+			</function>
+			
+			<function name="FindSession">				
+				<parameters>
+					<string name="sessionid" />	
+					<object name="sessionobj"/>	
+				</parameters>
+				<log><![CDATA[sessionid=<%=context.sessionid.toString()%>']]></log>
+				<if cond="thisclass.SessionContainer.hasValue(context.sessionid.toString())==true">
+					<then>
+						<lookup name="SessionContainer"  key="context.sessionid.toString()" output="context.sessionobj"/>
+					</then>
+					<else>
+						<exit/>
+					</else>
+				</if>
+			</function>	
+			<!-- hu 20170904 when timeout remove session-->
+			<function name="Timeout">
+				<long name="current"  />
+				<long name="oncurrent" />
+				<string name="sessionid"  />
+				<list name="removelist" valuetype="string"/>
+				<object name="sessionobj"  />
+				<pair name="oneSessionContainer"  keytype="string" valuetype="object"/>
+					<script><![CDATA[
+							function getCurrentTimerInMs() {
+								var timestamp=new Date().getTime();
+								return timestamp;
+							}
+							
+							context.current.setValue(getCurrentTimerInMs());
+					]]></script>
+				<log><![CDATA[Timeout SessionContainer!!!!!= '<%=context.SessionContainer.size().toString()%>']]></log>
+					<for var="oneSessionContainer" in="context.SessionContainer">
+						<set name="sessionobj" value="context.oneSessionContainer.second()"/>
+						<set name="sessionid" value="context.oneSessionContainer.first()"/>
+						<if cond="context.sessionobj.ptr == null">
+							<then>
+								<log>sessionobj is null </log>
+								<exit/>
+							</then>
+						</if>
+						<function name="Gettime" class="context.sessionobj">
+							<parameters>
+								<long name="time"  out="context.oncurrent"/>	
+							</parameters>
+						</function>
+						<log><![CDATA[current= '<%=context.current.toString()%>']]></log>
+						<log><![CDATA[oncurrent= '<%=context.oncurrent.toString()%>']]></log>
+						<if cond="context.current.toLong()-context.oncurrent.toLong()>=300000">
+							<then>
+								<insert name="removelist" value="context.sessionid.toString()"/>
+								<log>Timeout remove</log>
+							</then>
+						</if>
+					</for>
+					<log><![CDATA[removelist size!!!!!= '<%=context.removelist.size().toString()%>']]></log>
+					<for var="sessionid" in="context.removelist">
+						<remove name="SessionContainer" key="context.sessionid.toString()"/>
+					</for>
+			</function>
+		
+
+				
+				
+		</public>
+	</class>
+</starlang>
