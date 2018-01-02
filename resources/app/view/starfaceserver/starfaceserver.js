@@ -193,6 +193,11 @@
 			fs = _fs_;
             $scope.panelData = {};
 			
+            $('.nav-tabs a').click(function (e) {
+			    e.preventDefault();
+			    $(this).tab('show');
+			});
+
 			function respDataCb(data) {
 				$scope.data = data;
 				$log.log(data);

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<class name="CLinkManager">
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		CLinkManager.xml
+	@brief 		topo路径管理
+	@version 	1.1.0
+	@auth 		hu peng (hupeng@staros.xyz)
+	@date		2017/11/27
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+		<public>
+	<!--
+		@brief		得到topo路径
+		@auth 		hu peng (hupeng@staros.xyz)
+		@date		2017/11/24
+		Input:
+			@param filename 	openflow_topology.xml
+		  	@param xmldata   	fromdevice,todevide,path
+		Output: 
+	-->
+	
+			
+			<function name="sendpathtoClient">
+				<parameters>
+					<string name="transportid"/>
+				</parameters>
+				<string name="urlvar"/>
+				<string name="paths"/>
+				<string name="path1"/>
+				<object name="restfulclient"/>
+				<string name="fromdevice"/>
+				<string name="todevice"/>
+				<string name="srcport"/>
+				<string name="dstport"/>
+				<string name="path"/>
+				<string name="boopath"/>
+				<string name="fromdevicename"/>
+				<string name="todevicename"/>
+				<list  name="pathslist" valuetype="string"/>
+				<list  name="everypathlist" valuetype="string"/>
+				<string name="data"/>
+				
+				<function name="GetDataFromController">
+					<parameters>
+						<string name="url" in="'http://127.0.0.1:9922/onos/v1/topologyservice/topologys'"/>
+						<string name="eventdata" out="context.data"/>
+					</parameters>
+				</function>
+					<script><![CDATA[	
+						var json=context.data.toString();
+						context.print(typeof(json));		
+						context.paths.setValue(context.data.toString());
+					]]></script>
+
+				<if cond="context.paths.toString()==''">
+					<then>
+						<log level="100">******* exit *******</log>
+						<exit/>
+					</then>
+				</if>
+				
+				<script><![CDATA[	
+						var info = JSON.parse(context.paths.toString());
+						context.print("####################");
+						context.print(typeof(info.topology));
+						if (info.topology == null) {
+							context.boopath.setValue('');
+							context.print("boopath is null");
+						} else {
+							context.boopath.setValue("ok");
+						}
+					]]></script>
+				
+				<if cond="context.boopath.toString() == ''">
+					<then>
+						<exit/>
+					</then>
+					<else>
+						<log level="0"><![CDATA[paths = <%=context.paths.toString()%>]]></log>
+					<script><![CDATA[			
+						var info = JSON.parse(context.paths.toString());
+						for(var i=0;i<info.topology.length;i++){
+						 	context.pathslist.addValue(JSON.stringify(info.topology[i]));
+						}
+					]]></script>
+					
+				<log level="100"><![CDATA[pathslist = <%=context.pathslist.size().toString()%>]]></log>
+				<for var="path1" in="context.pathslist">
+					<script><![CDATA[	
+						var info = JSON.parse(context.path1.toString());
+						var jsonpath=JSON.parse(info.path);
+						for(var i=0;i<jsonpath.paths.length;i++){
+							context.everypathlist.addValue(JSON.stringify(jsonpath.paths[i]));
+						}
+					]]></script>
+				</for>
+				<log level="100"><![CDATA[everypathlist = <%=context.everypathlist.size().toString()%>]]></log>
+				<for var="path" in="context.everypathlist">
+					<script><![CDATA[	
+						var info = JSON.parse(context.path.toString());	
+						context.fromdevice.setValue(info.src.dpid);
+						context.todevice.setValue(info.dst.dpid);
+						context.srcport.setValue(info.src.port);
+						context.dstport.setValue(info.dst.port);		
+					]]></script>
+					
+					<if cond="context.datapathidMap.hasParam(context.fromdevice.toString())">
+						<then>
+							<log level="100">已找到-----------------------------</log>
+							<set name="context.fromdevicename" value="context.datapathidMap.getParam(context.fromdevice.toString())"/>
+						</then>
+						<else>
+							<log level="100"> 128 fromdevice is null !!</log>
+						</else>
+					</if>
+					
+					<if cond="context.datapathidMap.hasParam(context.todevice.toString())">
+						<then>
+							<log level="100">已找到-----------------------------</log>
+							<set name="context.todevicename" value="context.datapathidMap.getParam(context.todevice.toString())"/>
+						</then>
+						<else>
+							<log level="100"> 138 todevice is null !!</log>
+						</else>
+					</if>
+					
+					<function>
+						<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+							<jsonbody>
+								<![CDATA[
+								{
+								"event":"addLink","payload":
+								{"id":"<%=context.fromdevicename.toString()%>/<%=context.srcport.toString()%>-<%=context.todevicename.toString()%>/<%=context.dstport.toString()%>",
+								"type":"direct",
+								"expected":false,
+								"online":true,
+								"linkWidth":1.2,
+								"src":"<%=context.fromdevicename.toString()%>",
+								"srcPort":"<%=context.srcport.toString()%>",
+								"dst":"<%=context.todevicename.toString()%>",
+								"dstPort":"<%=context.dstport.toString()%>"
+								}
+								}
+								]]>
+							</jsonbody>
+						</websocket>
+					</function>
+					
+				</for>
+					</else>
+				</if>
+
+			</function>
+
+
+		</public>
+	</class>
+</starlang>

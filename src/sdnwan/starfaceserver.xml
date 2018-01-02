@@ -1,36 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		starfaceserver.xml
+	@brief 		
+	@version 	1.1.0
+	@auth 
+	@date		
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
 <!--StarOS Entry-->
 <starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<!--YY-->
+	<include src="specialLine/SpecialLineManager.xml"/>
+	<include src="config/ConfigManager.xml"/>
 
 	<include src="web/starfaceserverhttp.xml"/>
 	<!--qiulei 20170811-->
 	<include src="web/CSessionManager.xml"/>
-	<!-- wangkang 2017/11/01 -->
-	<include src="topo/CLinkManager.xml"/>
-	<!-- YXR 2017/11/01 -->
-	<include src="topo/CIEDSManager.xml"/>
-	<!-- YY 2017/11/02 -->
-	<include src="topo/CNetworkManager.xml"/>
+	
+	<!--qiulei 20171207pm -->
+	<include src="faultStatistics/FaultStatisticsManager.xml"/>
+	
 	<include src="topo/CTopoManager.xml"/>
-	<!-- qiulei 2017/11/02 -->
+	<include src="topo/CLinkManager.xml"/>
 	<include src="topo/CSwitchManager.xml"/>
-
-
+	<include src="utils/restfulclient.xml"/>
+	<!--qiulei 20171226-->
+	<include src="utils/datapathid_map.xml"/>
+	
+	<object name="SpecialLineMgr" global="true"/>
+	<object name="restfulserver"  global="true"/>
 	<object name="gSettingsManager" global="true"/>
 	<object name="WebSocketManager" global="true"/>
-	<object name="timer"/>
 	<object name="SessionManager" global="true"/>
-	<object name="restfulserver"  global="true"/>
 	<object name="LinkManager"  global="true"/>
-	<object name="IEDSManager"  global="true"/>
-	<object name="NetworkManager" global="true"/>
-	<object name="TopoManager" global="true"/>
-	<!--qiulei 20171102-->
 	<object name="switchManager"  global="true"/>
+	<object name="TopoManager" global="true"/>
+	<!--YY 20171208-->
+	<object name="ConfigMgr" global="true"/>
+	<!--qiulei 20171207 pm-->
+	<object name="FaultStatisticsMgr" global="true"/>
 	
-	<logconfig dest="stdout" level="9" filename="/opt/staros.xyz/starfaceserver/logs/starosapps.log" logturnoff="false"/>
+
+	<logconfig dest="stdout" level="0" filename="/opt/staros.xyz/starfaceserver/logs/starosapps.log" logturnoff="false"/>
 	<boolean name="isAPIAuth"  value="false"/>
-	<!--<object name="WebsocketForTest"/>-->
+	<object name="WebsocketForTest"/>
+	<object name="timer"/>
 	<function name="Restfulserver">
 		<params name="restfulparams"/>
 		<!--hu peng 2017/07/28-->
@@ -45,6 +74,10 @@
 	<events>
 		<!--Session StarUp-->
 		<onevent event="bundleapp.startup">
+			<!--qiulei 20171226-->
+			<function name="InitDatapathidMap"/>
+			<function name="ByChineseNameFindNumberMap"/>
+				
 			<long name="calloutSession" />
 			<string name="outjson"/>
 			<string name="injson" />
@@ -52,24 +85,22 @@
 			<string name="eventname"/>
 			<function>
 				<log level="10">##########Starfaceserver start#######</log>
-
+				<!-- YY -->
+				<new name="SpecialLineMgr" class="SpecialLineManager"/>
+				<new name="ConfigMgr" class="ConfigManager"/>
+				
+				<!--qiulei 20171207-->
+				<new name="FaultStatisticsMgr" class="FaultStatisticsManager"/>
+				
 				<!--Start GUI and Restful API Service-->
 				<new name="SessionManager" class="CSessionManager"/>
 				<function name="Restfulserver"/>
 				<set name="eventname"  value="'TimeOutEvent'"/>
 				<!--raise name="context.eventname.toString()"/-->
 				<timer name="context.timer" method="StartTimer" event="'TimeOutEvent'" timeout="2000"/>
-				<!-- wangkang 2017/11/01 -->
-				<new name="LinkManager" class="CLinkManager"/>
-				<function name="InitLinks" class="LinkManager"/>
-				<!-- YXR 2017/11/01 -->
-				<new name="IEDSManager" class="CIEDSManager"/>
-				<function name="InitIEDS" class="IEDSManager"/>
-				<!-- YY 2017/11/02 -->
-				<new name="NetworkManager" class="CNetworkManager"/>
 				<new name="TopoManager" class="CTopoManager"/>
-				<!-- qiulei 2017/11/01 -->
 				<new name="switchManager" class="CSwitchManager"/>
+				<new name="LinkManager" class="CLinkManager"/>
 
 			</function>
 		</onevent>
@@ -88,6 +119,11 @@
 				<function name="Timeout" class="SessionManager"/>
 				<!--wait event="InvalidEvent" timeout="2000"/-->
 				<!--raise name="'TimeOutEvent'"/-->
+			</function>
+		</onevent>
+		<onevent event="*">
+			<function>
+				<log>insert starfaceserver onevent *</log>				
 			</function>
 		</onevent>
 	</events>

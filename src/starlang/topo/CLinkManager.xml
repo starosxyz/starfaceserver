@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		starfaceserver.xml
+	@brief 		CLINK管理
+	@version 	1.1.0
+	@auth 		wangkang
+	@date		2017/11/01
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<!--
+			Author:
+					wangkang 
+			Date:
+					2017-11-01
+			Copyright: 
+					Nanjing StarOS Inc. All rights reserved.
+		-->
+	<class name="CLink">
+		<private>
+			<string name="m_No"/>
+			<string name="m_srcdevice"/>
+			<string name="m_dstdevice"/>
+			<string name="m_srcport"/>
+			<string name="m_dstport"/>
+		</private>
+		<public>
+			<function name="CLink">
+				<parameters>
+					<string name="No"/>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcport"/>
+					<string name="dstport"/>
+				</parameters>
+				<set name="thisclass.m_No" value="context.No.toString()"/>
+				<set name="thisclass.m_srcdevice" value="context.srcdevice.toString()"/>
+				<set name="thisclass.m_dstdevice" value="context.dstdevice.toString()"/>
+				<set name="thisclass.m_srcport" value="context.srcport.toString()"/>
+				<set name="thisclass.m_dstport" value="context.dstport.toString()"/>
+			</function>
+			
+			<!--qiulei 20171107pm-->
+			<function name="SendDetails">
+				<parameters>
+					<string name="transportid" />
+				</parameters>
+				<string name="detailarray" />
+				<script><![CDATA[
+					var oneArray = new Array();
+						oneArray.push("编号");
+						oneArray.push("源设备");
+						
+						oneArray.push("-");
+						oneArray.push("Latitude");
+						oneArray.push("Longitude");
+						oneArray.push("-");
+						
+						oneArray.push("目标设备");
+						oneArray.push("源端口");
+						oneArray.push("目标端口");
+
+					var twoarray = new Object();
+						twoarray['编号'] =thisclass.m_No.toString();
+						twoarray['源设备'] =thisclass.m_srcdevice.toString();
+						
+						twoarray['-'] = "";
+						twoarray['Latitude'] = null;
+						twoarray['Longitude'] = null;
+						
+						twoarray['目标设备'] = thisclass.m_dstdevice.toString();
+						twoarray['源端口'] = thisclass.m_srcport.toString();
+						twoarray['目标端口'] = thisclass.m_dstport.toString();
+					var threeArray = new Array();
+						threeArray.push("showDeviceView");
+						threeArray.push("showFlowView");
+						threeArray.push("showPortView");
+						threeArray.push("showGroupView");
+						threeArray.push("showMeterView");
+						threeArray.push("showDeviceFlows");
+						threeArray.push("showRelatedTraffic");
+
+					var payload = new Object();
+						payload['title'] = "of:" + thisclass.m_switchCode.toString();
+						payload['type'] = "switch";
+						payload['id'] = "of:" + thisclass.m_switchCode.toString();
+						payload['propOrder'] = oneArray;
+						payload['props'] = twoarray;
+						payload['buttons'] = threeArray;
+
+					var json = new Object();
+						json['event'] = "showDetails";
+						json['payload'] = payload;
+
+					var strjson=JSON.stringify(json);
+					context.detailarray.setValue(strjson);
+				]]></script>
+				<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+					<jsonsrc src="detailarray"/>
+				</websocket>
+			</function>
+			
+			
+			
+			
+			
+			
+			
+			<function name="PrintLink">
+				<log level="10"><![CDATA[No= <%=thisclass.m_No.toString()%>]]></log>
+				<log level="10"><![CDATA[srcdevice= <%=thisclass.m_srcdevice.toString()%>]]></log>
+				<log level="10"><![CDATA[dstdevice= <%=thisclass.m_dstdevice.toString()%>]]></log>
+				<log level="10"><![CDATA[srcport= <%=thisclass.m_srcport.toString()%>]]></log>
+				<log level="10"><![CDATA[dstport= <%=thisclass.m_dstport.toString()%>]]></log>
+			</function>
+
+			<function name="getNo">
+				<parameters>
+					<string name="no"/>
+				</parameters>
+				<set name="context.no" value="thisclass.m_No.toString()"/>
+			</function>
+
+			<function name="GetSrcDevice">
+				<parameters>
+					<string name="srcdevice"/>	
+				</parameters>
+				<set name="context.srcdevice" value="thisclass.m_srcdevice.toString()"/>
+			</function>
+			
+			<function name="GetDstDevice">
+				<parameters>
+					<string name="dstdevice"/>	
+				</parameters>
+				<set name="context.dstdevice" value="thisclass.m_dstdevice.toString()"/>
+			</function>
+			
+			<function name="GetSrcPort">
+				<parameters>
+					<string name="srcport"/>	
+				</parameters>
+				<set name="context.srcport" value="thisclass.m_srcport.toString()"/>
+			</function>
+			
+			<function name="GetDstPort">
+				<parameters>
+					<string name="dstport"/>	
+				</parameters>
+				<set name="context.dstport" value="thisclass.m_dstport.toString()"/>
+			</function>
+
+			<function name="update">
+				<parameters>
+					<string name="no"/>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcport"/>
+					<string name="dstport"/>
+				</parameters>
+				<set name="thisclass.m_No" value="context.no.toString()"/>
+				<set name="thisclass.m_srcdevice" value="context.srcdevice.toString()"/>
+				<set name="thisclass.m_dstdevice" value="context.dstdevice.toString()"/>
+				<set name="thisclass.m_srcport" value="context.srcport.toString()"/>
+				<set name="thisclass.m_dstport" value="context.dstport.toString()"/>
+			</function>
+
+			<function name="Link2Json">
+				<parameters>
+					<string name="LinkObject2Json"/>
+				</parameters>
+				<string name="values"/>
+				<reference variable="values">
+					<jsonbody><![CDATA[ 
+						{
+						    "event": "addLink",
+						    "payload": {
+						        "id": "of:<%=thisclass.m_srcdevice.toString()%>/<%=thisclass.m_srcport.toString()%>-of:<%=thisclass.m_dstdevice.toString()%>/<%=thisclass.m_dstport.toString()%>",
+						        "type": "direct",
+						        "expected": false,
+						        "online": true,
+						        "linkWidth": 1.2,
+						        "src": "of:<%=thisclass.m_srcdevice.toString()%>",
+						        "srcPort": "<%=thisclass.m_srcport.toString()%>",
+						        "dst": "of:<%=thisclass.m_dstdevice.toString()%>",
+						        "dstPort": "<%=thisclass.m_dstport.toString()%>"
+						    }
+						}
+					]]></jsonbody>
+				</reference>
+				<set name="LinkObject2Json" value="context.values.toString()"/>
+			</function>
+			
+			<!-- wangkang 2017/11/02 -->
+			<function name="LinkDataToJson">
+				<parameters>
+					<string name="LinkToJson"/>
+				</parameters>
+				<string name="values"/>
+				<reference variable="values">
+					<jsonbody><![CDATA[ 
+						{	
+							"No": "<%=thisclass.m_No.toString()%>",
+					        "srcdevice": "<%=thisclass.m_srcdevice.toString()%>",
+					        "dstdevice": "<%=thisclass.m_dstdevice.toString()%>",
+					        "srcport": "<%=thisclass.m_srcport.toString()%>",
+					        "dstport": "<%=thisclass.m_dstport.toString()%>"
+						}
+					]]></jsonbody>
+				</reference>
+				<set name="LinkToJson" value="context.values.toString()"/>
+			</function>
+			
+		</public>
+	</class>
+	
+	<class name="CLinkManager">
+		<private>
+			<list name="LinkContainer" valuetype="object"/>
+		</private>
+		<public>
+			<function name="CLinkManager">
+				<log>CLinkManager is Create</log>
+			</function>
+			
+			<!--qiulei 20171108 am-->
+			<function name="getLinkContainer">
+				<parameters>
+					<hashmap name="LinkContainer" keytype="string" valuetype="object"/>
+				</parameters>
+				<set name="LinkContainer" value="thisclass.LinkContainer"/>
+			</function>
+			
+			<function name="InitLinks">
+				<string name="No"/>
+				<string name="srcdevice"/>
+				<string name="dstdevice"/>
+				<string name="srcport"/>
+				<string name="dstport"/>
+				<long name="linklength"/>
+				<object name="linkobj"/>
+				<long name="i"/>
+				<messageblock name="filelink"/>
+				
+				<file method="readfile" name="'/opt/staros.xyz/starfaceserver/starlang/topo/json/switchport.json'" data="context.filelink"/>
+				<log level="10"><![CDATA[filelink= <%=context.filelink.toString()%>]]></log>
+				
+				<script><![CDATA[
+					var link = JSON.parse(context.filelink.toString());
+					var linklength = link.switchports.length;
+					context.linklength.setValue(linklength);	
+				]]></script>
+				<log level="10"><![CDATA[linklength= <%=context.linklength.toString()%>]]></log>
+				
+				<for var="i" from="0" to="context.linklength.toLong()">
+					<script><![CDATA[
+						var info = JSON.parse(context.filelink.toString());
+						var link = info.switchports;
+						context.No.setValue(link[context.i.toLong()].No.toString());
+						context.srcdevice.setValue(link[context.i.toLong()].srcdevice.toString());
+						context.dstdevice.setValue(link[context.i.toLong()].dstdevice.toString());
+						context.srcport.setValue(link[context.i.toLong()].srcport.toString());
+						context.dstport.setValue(link[context.i.toLong()].dstport.toString());	
+					]]></script>
+					
+					<new name="linkobj" class="CLink">
+						<parameters>
+							<string name="No" in="context.No.toString()"/>
+							<string name="srcdevice" in="context.srcdevice.toString()"/>
+							<string name="dstdevice" in="context.dstdevice.toString()"/>
+							<string name="srcport" in="context.srcport.toString()"/>
+							<string name="dstport" in="context.dstport.toString()"/>
+						</parameters>
+					</new>
+					<function name="PrintLink" class="context.linkobj"/>
+					<insert name="thisclass.LinkContainer" value="context.linkobj"/>
+				</for>
+				
+				<log level="10"><![CDATA[LinkContainer.size= <%=thisclass.LinkContainer.size().toString()%>]]></log>
+				
+			</function>
+
+			<function name="allLink2Json">
+				<parameters>
+					<string name="transportid"/>
+				</parameters>
+				<object name="onelink"/>
+				<string name="onelinkstr"/>				
+				<for var="onelink" in="thisclass.LinkContainer">
+					<if cond="context.onelink.ptr!=null">
+						<then>
+							<function name="Link2Json" class="context.onelink">
+								<parameters>
+									<string name="LinkObject2Json" out="context.onelinkstr"/>
+								</parameters>
+							</function>
+							<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+								<jsonsrc src="onelinkstr"/>
+							</websocket>
+						</then>
+					</if>
+				</for> 
+			</function>	
+			
+			<!-- wangkang 2017/11/02 -->
+			<function name="SendAllLinkToWebClient">
+				<object name="onelink"/>
+				<string name="onelinkstr"/>
+				<string name="sendjsonstr"/>
+				<list name="AllLinkDataList" valuetype="string"/>
+				<for var="onelink" in="thisclass.LinkContainer">
+					<if cond="context.onelink.ptr!=null">
+						<then>
+							<function name="LinkDataToJson" class="context.onelink">
+								<parameters>
+									<string name="LinkToJson" out="context.onelinkstr"/>
+								</parameters>
+							</function>
+							<insert name="AllLinkDataList" value="context.onelinkstr.toString()"/>
+						</then>
+					</if>
+				</for>
+				
+				<script><![CDATA[
+					var json = new Object();
+					var myArray = new Array();  
+					
+					var firstString = context.AllLinkDataList.getFirst();
+					while(firstString != null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString = context.AllLinkDataList.getNext();
+					}
+					
+					json['event'] = 'linkmgrDataResponse';
+					
+					var payload = new Object();
+					payload['switchports'] = myArray;
+
+					json['payload'] = payload;
+					var strjson=JSON.stringify(json);
+					context.sendjsonstr.setValue(strjson);
+				]]></script>
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonsrc src="sendjsonstr"/>
+				</websocket>
+			</function>			
+
+			<function name="getLinkByNo">
+				<parameters>
+					<string name="no"/>
+					<object name="onelink"/>
+				</parameters>
+				<object name="link"/>
+				<string name="link_no"/>
+				<for var="context.link" in="thisclass.LinkContainer">
+					<if cond="context.link.ptr!=null">
+						<then>
+							<function name="getNo" class="context.link">
+								<parameters>
+									<string name="no" out="context.link_no"/>
+								</parameters>
+							</function>
+							<if cond="context.link_no.toString()==context.no.toString()">
+								<then>
+									<set name="context.onelink" value="context.link"/>
+									<exit/>
+								</then>
+							</if>
+						</then>
+					</if>
+				</for>
+			</function>
+
+			<function name="addLink">
+				<parameters>
+					<string name="no"/>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcport"/>
+					<string name="dstport"/>
+				</parameters>
+				<object name="link"/>
+				<string name="link_data"/>
+				<new name="context.link" class="CLink">
+					<parameters>
+						<string name="No" in="context.no.toString()"/>
+						<string name="srcdevice" in="context.srcdevice.toString()"/>
+						<string name="dstdevice" in="context.dstdevice.toString()"/>
+						<string name="srcport" in="context.srcport.toString()"/>
+						<string name="dstport" in="context.dstport.toString()"/>
+					</parameters>					
+				</new>
+				<if cond="context.link.ptr!=null">
+					<then>
+						<insert name="thisclass.LinkContainer" value="context.link"/>
+						<function name="LinkDataToJson" class="context.link">
+							<parameters>
+								<string name="LinkToJson" out="context.link_data"/>
+							</parameters>
+						</function>
+						<!--function name="handleFile"/-->
+					</then>
+				</if>
+			</function>
+
+			<function name="deleteLink">
+				<parameters>
+					<string name="no"/>					
+				</parameters>
+				<object name="link"/>
+				<function name="getLinkByNo">
+					<parameters>
+						<string name="no" in="context.no.toString()"/>
+						<object name="onelink" out="context.link"/>
+					</parameters>
+				</function>
+				<remove name="thisclass.LinkContainer" value="context.link"/>
+				<!--function name="handleFile"/-->
+			</function>
+
+			<function name="updateLink">
+				<parameters>
+					<string name="no"/>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcport"/>
+					<string name="dstport"/>
+				</parameters>
+				<object name="link"/>
+				<string name="link_data"/>
+				<function name="getLinkByNo">
+					<parameters>
+						<string name="no" in="context.no.toString()"/>
+						<object name="onelink" out="context.link"/>
+					</parameters>
+				</function>
+				<if cond="context.link.ptr!=null">
+					<then>
+						<remove name="thisclass.LinkContainer" value="context.link"/>
+						<function name="update" class="context.link">
+							<parameters>
+								<string name="no" in="context.no.toString()"/>
+								<string name="srcdevice" in="context.srcdevice.toString()"/>
+								<string name="dstdevice" in="context.dstdevice.toString()"/>
+								<string name="srcport" in="context.srcport.toString()"/>
+								<string name="dstport" in="context.dstport.toString()"/>
+							</parameters>
+						</function>
+						<insert name="thisclass.LinkContainer" value="context.link"/>
+						<function name="LinkDataToJson" class="context.link">
+							<parameters>
+								<string name="LinkToJson" out="context.link_data"/>
+							</parameters>
+						</function>
+						<!--function name="handleFile"/-->
+					</then>
+				</if>
+			</function>
+
+			<function name="handleFile">				
+				<string name="path" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/switchport.json'"/>
+				<file method="deletefile" name="context.path.toString()"/>
+				<string name="data"/>
+				<object name="link"/>
+				<string name="link_data"/>
+				<list name="list_link" valuetype="string"/>
+				<for var="context.link" in="thisclass.LinkContainer">
+					<function name="LinkDataToJson" class="context.link">
+						<parameters>
+							<string name="LinkToJson" out="context.link_data"/>
+						</parameters>
+					</function>
+					<insert name="context.list_link" value="context.link_data.toString()"/>
+				</for>
+				<script><![CDATA[					
+					var myArray = new Array();  					
+					var firstString = context.list_link.getFirst();
+					while(firstString != null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString = context.list_link.getNext();
+					}
+					var json = new Object();
+					json['switchports'] = myArray;					
+					var strjson=JSON.stringify(json);
+					context.data.setValue(strjson);					
+				]]></script>
+				<file method="writefile" name="context.path.toString()" data="context.data.toMessageBlock()"/>				
+			</function>
+
+			<function name="getLinkData">
+				<parameters>
+					<string name="no"/>					
+				</parameters>
+				<string name="data"/>
+				<object name="link"/>
+				<string name="srcdevice"/>
+				<string name="dstdevice"/>
+				<string name="srcport"/>
+				<string name="dstport"/>
+				<function name="getLinkByNo">
+					<parameters>
+						<string name="no" in="context.no.toString()"/>
+						<object name="onelink" out="context.link"/>
+					</parameters>
+				</function>
+				<if cond="context.link.ptr==null">
+					<then>
+						<exit/>
+					</then>
+				</if>
+				<function name="GetSrcDevice" class="context.link">
+					<parameters>
+						<string name="srcdevice" out="context.srcdevice"/>
+					</parameters>
+				</function>
+				<function name="GetDstDevice" class="context.link">
+					<parameters>
+						<string name="dstdevice" out="context.dstdevice"/>
+					</parameters>
+				</function>
+				<function name="GetSrcPort" class="context.link">
+					<parameters>
+						<string name="srcport" out="context.srcport"/>
+					</parameters>
+				</function>
+				<function name="GetDstPort" class="context.link">
+					<parameters>
+						<string name="dstport" out="context.dstport"/>
+					</parameters>
+				</function>
+				<script><![CDATA[
+					var json = new Object();
+					var switchobj = new Object();					
+					json['event'] = 'giveLink';					
+					var payload = new Object();
+					switchobj.no = context.no.toString();
+					switchobj.srcdevice = context.srcdevice.toString();
+					switchobj.dstdevice = context.dstdevice.toString();
+					switchobj.srcport = context.srcport.toString();
+					switchobj.dstport = context.dstport.toString();
+					payload.switch = switchobj;
+					json['payload'] = payload;
+					var strjson=JSON.stringify(json);
+					context.data.setValue(strjson);					
+				]]></script>
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonsrc src="data"/>
+				</websocket>
+			</function>
+			
+			<!--qiulei 20171108 am-->
+			<function name="getLinkObj">
+				<parameters>
+					<string name="datapathid"/>
+					<object name="oneLink"/>
+				</parameters>
+				<set name="context.oneLink" value="thisclass.LinkContainer.getValue(context.datapathid.toString())"/>
+			</function>
+			
+			<!--qiulei 20171108 am-->
+			<function name="SendDetails">	
+				<parameters>
+					<string name="transportid"/>
+					<string name="datapathid"/>	
+				</parameters>
+				
+				<object name="linkObj"/>
+				<function name="getLinkObj">
+					<parameters>
+						<string name="datapathid" in="context.datapathid.toString()"/>
+						<object name="oneLink" out="context.linkObj"/>
+					</parameters>
+				</function>
+				
+				<if cond="context.linkObj.ptr!=null">
+					<then>
+						<function name="SendDetails" class="context.linkObj">
+							<parameters>
+								<string name="transportid" in="context.transportid.toString()"/>
+							</parameters>
+						</function>
+					</then>
+				</if>
+			</function>
+		</public>
+	</class>
+</starlang>

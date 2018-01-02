@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		specialLine.xml
+	@brief 		故障统计
+	@version 	1.1.0
+	@auth 		qiulei
+	@date		2017/12/07
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">	
+	<class name="FaultStatisticsManager">
+		<private>
+		</private>
+		<public>
+			<function name="FaultStatisticsManager">
+				<log level="100">enter FaultStatisticsManager</log>
+			</function>
+			<function name="getTestJson">
+				<string name="sendjsonstr" />
+				<string name="exampleJson" />
+				<reference variable="exampleJson">
+					<jsonbody>
+						<![CDATA[
+							{
+								"event":"faultStatisticsDataResponse",
+								"payload":{
+									"faultStatistics":[
+										{
+											"id":"183",
+											"user":"John Doe",
+											"date":"11-7-2014",
+											"status":"success",
+											"reason":"Bacon ipsum dolor sit amet salami venison chicken flank fatback doner."
+										},
+										{
+											"id":"219",
+											"user":"Alexander Pierce",
+											"date":"11-7-2014",
+											"status":"warning",
+											"reason":"Bacon ipsum dolor sit amet salami venison chicken flank fatback doner."
+										},
+										{
+											"id":"657",
+											"user":"Bob Doe",
+											"date":"11-7-2014",
+											"status":"primary",
+											"reason":"Bacon ipsum dolor sit amet salami venison chicken flank fatback doner."
+										},
+										{
+											"id":"175",
+											"user":"Mike Doe",
+											"date":"11-7-2014",
+											"status":"danger",
+											"reason":"Bacon ipsum dolor sit amet salami venison chicken flank fatback doner."
+										}
+									]
+								}
+							}
+						]]>
+					</jsonbody>
+				</reference>
+				<set name="sendjsonstr" value="context.exampleJson.toString()"/>
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonsrc src="context.sendjsonstr"/>
+				</websocket>
+				
+				<log level="100">getTestJson execute finish  ----FaultStatisticsManager.xml</log>
+			</function>
+			
+		</public>
+	</class>
+</starlang>

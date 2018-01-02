@@ -230,17 +230,14 @@ CAWResult COpenflowServer::StartSSLServer(const CAWString &ip, uint16_t port)
 }
 
 void COpenflowServer::process(long sid, Json::Value &payload, IUiExtension *pUi){
-    CAW_INFO_TRACE("COpenflowServer::process");
-    
-    CAWString responseEventType("OpenflowDataResponse");
-    
+    CAW_INFO_TRACE("COpenflowServer::process");   
+    CAWString responseEventType("OpenflowDataResponse");  
     static int reqid=0;
     Json::Value response;
     reqid++;
     Json::Value requestype = payload["requestype"];
     std::string strrequestype=requestype.asString();
-    CAW_INFO_TRACE("CStarOpenflow::process strrequestype="<<strrequestype);
-    
+    CAW_INFO_TRACE("CStarOpenflow::process strrequestype="<<strrequestype);   
     if(strrequestype=="getInfo")
     {
         ResponseData(response);

@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		starfaceserver.xml
+	@brief 		CSwitch管理
+	@version 	1.1.0
+	@auth 		qiulei
+	@date		2017/11/01
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+<!--
+	Author:
+			qiulei
+	Date:
+			2017-11-01
+	Copyright: 
+			Nanjing StarOS Inc. All rights reserved.
+-->
+	<class name="CSwitch">
+		<private>
+			<string name="m_switchSequence" />
+			<string name="m_switchCode" />
+			<string name="m_switchName" />
+		</private>
+		
+		<public>
+			<function name="CSwitch">
+				<parameters>
+					<string name="switchSequence"/>
+					<string name="switchCode" />
+					<string name="switchName" />
+					
+				</parameters>
+				<set name="thisclass.m_switchSequence" value="context.switchSequence.toString()"/>
+				<set name="thisclass.m_switchCode" value="context.switchCode.toString()"/>
+				<set name="thisclass.m_switchName" value="context.switchName.toString()"/>
+			</function>
+			
+			<!--qiulei 20171102 pm-->
+			<function name="OneSwitchObjectToJsonString">
+				<parameters>
+					<string name="switchObjectToJson"/>
+				</parameters>
+				<string name="values"/>
+				<reference variable="values">
+					<jsonbody><![CDATA[ 
+						{	
+							"switchseq":"<%=thisclass.m_switchSequence.toString()%>",
+							"switchcode":"<%=thisclass.m_switchCode.toString()%>",
+							"switchname":"<%=thisclass.m_switchName.toString()%>"
+						}
+					]]></jsonbody>
+				</reference>
+				<set name="switchObjectToJson" value="context.values.toString()"/>
+			</function>
+
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		
+			<function name="GetSwitchSequence">
+				<parameters>
+					<string name="switchSequence" />
+				</parameters>
+				<set name="switchSequence" value="thisclass.m_switchSequence.toString()"/>
+			</function>
+			
+			<function name="GetSwitchCode">
+				<parameters>
+					<string name="switchCode" />
+				</parameters>
+				<set name="switchCode" value="thisclass.m_switchCode.toString()"/>
+			</function>
+			
+			<function name="GetSwitchName">
+				<parameters>
+					<string name="switchName"/>
+				</parameters>
+				<set name="switchName" value="thisclass.m_switchName.toString()"/>
+			</function>
+			
+			
+			<function name="printSwitch">
+					<log level="10"><![CDATA[Switch printSwitch switchSequence = <%=thisclass.m_switchSequence.toString()%>]]></log>
+					<log level="10"><![CDATA[Switch printSwitch switchCode = <%=thisclass.m_switchCode.toString()%>]]></log>
+					<log level="10"><![CDATA[Switch printSwitch switchName = <%=thisclass.m_switchName.toString()%>]]></log>
+					<log level="10">---------------------------------------------------------------------------------------</log>
+			</function>
+			
+			
+			<function name="Switch2Json">
+				<parameters>
+					<string name="SwitchObject2Json"/>
+				</parameters>
+				<string name="values"/>
+				<double name="x"/>
+				<double name="y"/>
+				<script><![CDATA[					
+					var fax = Math.random() >= 0.5 ? Math.random()*1101 : Math.random()*-601;													
+					context.x.setValue(fax);
+					var y=Math.random()*201+700;
+					context.y.setValue(y);
+					]]>
+				</script>
+				<reference variable="values">
+					<jsonbody><![CDATA[ 
+						{
+							"event":"addDevice",
+							"payload":
+							{
+								"id":"of:<%=thisclass.m_switchCode.toString()%>",
+								"type":"switch",
+								"online":true,
+								"master":"<%=thisclass.m_switchName.toString()%>",
+								"labels":
+									[
+									"","of:<%=thisclass.m_switchCode.toString()%>",
+									"of:<%=thisclass.m_switchCode.toString()%>"
+									],
+								"props":
+									{
+										"managementAddress":"<%=thisclass.m_switchName.toString()%>",
+										"protocol":"OF_13",
+										"channelId":"<%=thisclass.m_switchSequence.toString()%>"
+									},
+								"metaUi":
+								{
+									"x":<%=context.x.toDouble()%>,
+									"y":<%=context.y.toDouble()%>,
+									"equivLoc":
+										{
+										"lng":-98.18860657853635,
+										"lat":43.492555430485986
+										}
+								}
+							}
+						}
+					]]></jsonbody>
+				</reference>
+				<set name="SwitchObject2Json" value="context.values.toString()"/>
+			</function>
+			
+			<function name="SendDetails">
+				<parameters>
+					<string name="transportid" />
+				</parameters>
+				<string name="detailarray" />
+				<script><![CDATA[
+					var oneArray = new Array();
+						oneArray.push("交换机名");
+						//oneArray.push("Vendor");
+						//oneArray.push("H/W Version");
+						//oneArray.push("S/W Version");
+						//oneArray.push("Serial #");
+						oneArray.push("协议类型");
+						oneArray.push("-");
+						oneArray.push("Latitude");
+						oneArray.push("Longitude");
+						oneArray.push("-");
+						oneArray.push("端口个数");
+						//oneArray.push("Flows");
+						//oneArray.push("Tunnels");
+						oneArray.push("设备序号");
+						oneArray.push("设备名称");
+						oneArray.push("设备代码");
+
+					var twoarray = new Object();
+						twoarray['交换机名'] = "of:" + thisclass.m_switchCode.toString();
+						//twoarray['Vendor'] = "";
+						//twoarray['H/W Version'] = "1.10.0";
+						//twoarray['S/W Version'] = "1.10.0";
+						//twoarray['Serial #'] = "";
+						twoarray['协议类型'] = "OF_13";
+						twoarray['-'] = "";
+						twoarray['Latitude'] = null;
+						twoarray['Longitude'] = null;
+						twoarray['端口个数'] = 4;
+						//twoarray['Flows'] = 4;
+						//twoarray['Tunnels'] = 0;
+						
+						twoarray['设备序号'] = thisclass.m_switchSequence.toString();
+						twoarray['设备名称'] = thisclass.m_switchName.toString();
+						twoarray['设备代码'] = thisclass.m_switchCode.toString();
+					var threeArray = new Array();
+						threeArray.push("showDeviceView");
+						threeArray.push("showFlowView");
+						threeArray.push("showPortView");
+						threeArray.push("showGroupView");
+						threeArray.push("showMeterView");
+						threeArray.push("showDeviceFlows");
+						threeArray.push("showRelatedTraffic");
+					var payload = new Object();
+						payload['title'] = "of:" + thisclass.m_switchCode.toString();
+						payload['type'] = "switch";
+						payload['id'] = "of:" + thisclass.m_switchCode.toString();
+						payload['propOrder'] = oneArray;
+						payload['props'] = twoarray;
+						//payload['buttons'] = threeArray;
+
+					var json = new Object();
+						json['event'] = "showDetails";
+						json['payload'] = payload;
+
+					var strjson=JSON.stringify(json);
+					context.detailarray.setValue(strjson);
+				]]></script>
+				<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+					<jsonsrc src="detailarray"/>
+				</websocket>
+			</function>
+		</public>
+	</class>
+	
+	<class name="CSwitchManager">
+		<private>
+			<hashmap name="switchContainer" keytype="string" valuetype="object"/>
+		</private>
+		<public>
+			<function name="CSwitchManager">
+				<log level="10">CSwitchManager is create</log>
+				<function name="initSwitchs"/>
+			</function>
+			
+			<!--qiulei 20171108 am-->
+			<function name="getSwitchContainer">
+				<parameters>
+					<hashmap name="switchContainer" keytype="string" valuetype="object"/>
+				</parameters>
+				<set name="switchContainer" value="thisclass.switchContainer"/>
+			</function>
+			
+			<!--qiulei 20171102 pm-->
+			<function name="SendAllSwitchToWebClient">
+				<string name="switchjsonstr"/>
+				<string name="sendjsonstr"/>
+				<object name="switchobj"/>
+				<list name="allSwitchJsonStrlist" valuetype="string"/>
+				
+				<pair name="oneSwitchPair" keytype="string" valuetype="object"/>
+				<for var="oneSwitchPair" in="context.switchContainer">
+					<function>
+						<set name="switchobj" value="context.oneSwitchPair.second()"/>
+						<if cond="context.switchobj.ptr != null">
+							<then>
+								<function name="OneSwitchObjectToJsonString" class="context.switchobj">
+									<parameters>
+										<string name="switchObjectToJson" out="switchjsonstr"/>
+									</parameters>
+								</function>
+								<insert name="allSwitchJsonStrlist" value="context.switchjsonstr.toString()"/>
+							</then>
+						</if>	
+						
+					</function>
+				</for>
+				
+				<script><![CDATA[
+					
+					var myArray=new Array();  
+					
+					var firstString=context.allSwitchJsonStrlist.getFirst();
+					while(firstString!=null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString=context.allSwitchJsonStrlist.getNext();
+					}
+					
+					
+					
+					var payload = new Object();
+						payload['switchs']=myArray;
+					
+					var json = new Object();
+						json['event']='devicemgrDataResponse';
+						json['payload']=payload;
+						
+					var strjson=JSON.stringify(json);
+					context.sendjsonstr.setValue(strjson);
+				]]></script>
+				<log level="10">254 转化为json完成！！！！！！</log>
+				<log level="10">======================================================</log>
+				<log level="10">
+					<![CDATA[jsonstr数据257：<%=context.sendjsonstr.toString()%>]]>
+				</log>
+				<log level="10">======================================================</log>
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonsrc src="sendjsonstr"/>
+				</websocket>
+			</function>
+		
+		
+		
+			<function name="initSwitchs">
+				<string name="filepath" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/switch.json'"/>
+				<messageblock name="switchdata"/>
+				<file method="readfile" name="context.filepath.toString()" data="context.switchdata"/>
+				
+				<long name="list_length"/>
+				
+				<string name="switchSequence"/>
+				<string name="switchCode"/>
+				<string name="switchName"/>
+				
+				<object name="switchobj"/>
+				<long name="i"/>
+				
+				
+				<script><![CDATA[
+					var switchlist = JSON.parse(context.switchdata.toString());
+					context.list_length.setValue(switchlist.switchs.length);
+				]]></script>
+				
+				
+				<for var="i" from="0" to="context.list_length.toLong()">
+					<script><![CDATA[
+						var switchlist = JSON.parse(context.switchdata.toString());
+						var arr_switch = switchlist.switchs;
+						
+						context.switchSequence.setValue(arr_switch[context.i.toLong()].switchseq);
+						context.switchCode.setValue(arr_switch[context.i.toLong()].switchcode);
+						context.switchName.setValue(arr_switch[context.i.toLong()].switchname);
+					]]></script>
+					
+					<new name="switchobj" class="CSwitch">
+						<parameters>
+							<string name="switchSequence" in="context.switchSequence.toString()"/>
+							<string name="switchCode" in="context.switchCode.toString()" />
+							<string name="switchName" in="context.switchName.toString()" />
+						</parameters>
+					</new>
+					
+					<insert name="thisclass.switchContainer" key="context.switchCode.toString()" value="context.switchobj"/>
+				</for>
+			</function>															
+			
+			<!--查询容器中元素的个数-->
+			<function name="GetSwitchCounts">
+				<parameters>
+					<string name="switchCounts"/>
+				</parameters>
+				<set name="switchCounts" value="context.switchContainer.size()"/>	
+			</function>
+			
+			<function name="getSwitch">
+				<parameters>
+					<string name="datapathid"/>
+					<object name="oneswitch"/>
+				</parameters>
+				<set name="oneswitch" value="thisclass.switchContainer.getValue(context.datapathid.toString())"/>
+			</function>
+
+			<function name="allSwitch2Json">
+				<parameters>
+					<string name="transportid"/>
+				</parameters>
+				<object name="oneswitch"/>
+				<string name="oneswitchstr"/>
+				<pair name="oneswitchpair" keytype="string" valuetype="object"/>
+				
+				<log level="10"><![CDATA[325 !!!switchContainer count!!!!!!!!!!!!!!!!= <%=context.switchContainer.size().toString()%>]]></log>
+				<for var="oneswitchpair" in="thisclass.switchContainer">
+					<set name="context.oneswitch" value="context.oneswitchpair.second()"/>
+					<if cond="context.oneswitch.ptr!=null">
+						<then>
+							<function name="Switch2Json" class="context.oneswitch">
+								<parameters>
+									<string name="SwitchObject2Json" out="context.oneswitchstr"/>
+								</parameters>
+							</function>
+							<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+								<jsonsrc src="oneswitchstr"/>
+							</websocket>
+							<log level="10"><![CDATA[338 !!!oneswitchstr !!!!!!!!!!!!!!!!= <%=context.oneswitchstr.toString()%>]]></log>
+						</then>
+					</if>
+				</for> 
+				
+				
+			</function>
+
+			
+				
+				
+				
+				
+				<function name="SendAddDeviceToWebClient">
+					<string name="filepath" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/switch.json'"/>
+					<string name="switchcode"/>
+					<string name="switchname"/>
+					<string name="switchseq"/>
+					<string name="switchjsonstr"/>
+					<string name="sendjsonstr"/>
+					<object name="switchobj"/>
+					<string name="alldevice"/>
+					<list name="allSwitchJsonStrlist" valuetype="string"/>
+					<script><![CDATA[
+					var info = JSON.parse(event.getParam("eventdata").toString());
+					context.print("412!!!!!!!!!!!!!!");
+					
+					context.alldevice.setValue(info.payload);
+					context.print("416!!!!!!!!!!!!"+context.alldevice.toString());
+					var alldevices=context.alldevice.toString();
+					var switchcode=(alldevices.split(",")[0]).split(":")[1].replace("\"","").replace("\"","").replace("}","");
+					context.print("364!!!!"+switchcode);
+					var switchname=(alldevices.split(",")[1]).split(":")[1].replace("\"","").replace("\"","").replace("}","");
+					context.print("366!!!!"+switchname);
+					var switchseq=(alldevices.split(",")[2]).split(":")[1].replace("\"","").replace("\"","").replace("}","");
+					context.print("368!!!!"+switchseq);
+					context.switchcode.setValue(switchcode);
+					context.switchname.setValue(switchname);
+					context.switchseq.setValue(switchseq);
+					]]></script>
+					<new name="switchobj" class="CSwitch">
+						<parameters>
+							<string name="switchSequence" in="context.switchseq.toString()"/>
+							<string name="switchCode" in="context.switchcode.toString()" />
+							<string name="switchName" in="context.switchname.toString()" />
+						</parameters>
+					</new>
+				<insert name="thisclass.switchContainer" key="context.switchcode.toString()" value="context.switchobj"/>
+					
+				<pair name="oneSwitchPair" keytype="string" valuetype="object"/>
+				<for var="oneSwitchPair" in="context.switchContainer">
+					<function>
+						<set name="switchobj" value="context.oneSwitchPair.second()"/>
+						<if cond="context.switchobj != null">
+							<then>
+								<function name="OneSwitchObjectToJsonString" class="context.switchobj">
+									<parameters>
+										<string name="switchObjectToJson" out="switchjsonstr"/>
+									</parameters>
+								</function>
+								<insert name="allSwitchJsonStrlist" value="context.switchjsonstr.toString()"/>
+							</then>
+						</if>	
+						
+					</function>
+				</for>
+				<script><![CDATA[
+					var json = new Object();
+					var myArray=new Array(); 
+					var firstString=context.allSwitchJsonStrlist.getFirst();
+					while(firstString!=null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString=context.allSwitchJsonStrlist.getNext();
+					} 
+					json['switchs']=myArray;
+					var strjson=JSON.stringify(json);
+					context.print(strjson);
+					context.sendjsonstr.setValue(strjson);
+					
+					
+				]]></script>
+					<file method="writefile" name="context.filepath.toString()" data="context.sendjsonstr.toMessageBlock()"/>
+				</function>
+				
+				
+				
+				<function name="SendDeleteDeviceToWebClient">
+					<string name="filepath" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/switch.json'"/>
+					<string name="oneswitchCode"/>
+					<string name="switchjsonstr"/>
+					<string name="sendjsonstr"/>
+					<string name="alldeletedevice"/>
+					<object name="switchobj"/>
+					<list name="allSwitchJsonStrlist" valuetype="string"/>
+					<script><![CDATA[
+			
+					var allinfo=event.getParam("eventdata").toString();
+					context.print(allinfo);
+					var switchcodes=allinfo.split(",")[1];
+					context.print(switchcodes);
+					var switchcode=switchcodes.substring(24).replace("\"","").replace("\"","").replace("}","").replace("}","");
+					context.print(switchcode);
+					
+					context.oneswitchCode.setValue(switchcode);
+					]]></script>
+					<log level="10">remove</log>
+					<remove name="switchContainer" key="context.oneswitchCode.toString()"/>
+				<log level="10"><![CDATA[switchContainer!!= <%=context.switchContainer.size().toString()%>]]></log>
+				<pair name="oneSwitchPair" keytype="string" valuetype="object"/>
+				<for var="oneSwitchPair" in="context.switchContainer">
+					<function>
+						<set name="switchobj" value="context.oneSwitchPair.second()"/>
+						<if cond="context.switchobj != null">
+							<then>
+								<log level="10">not null</log>
+								<function name="OneSwitchObjectToJsonString" class="context.switchobj">
+									<parameters>
+										<string name="switchObjectToJson" out="switchjsonstr"/>
+									</parameters>
+								</function>
+								<insert name="allSwitchJsonStrlist" value="context.switchjsonstr.toString()"/>
+							</then>
+						</if>	
+						
+					</function>
+				</for>
+				<script><![CDATA[
+					var json = new Object();
+					var myArray=new Array(); 
+					var firstString=context.allSwitchJsonStrlist.getFirst();
+					while(firstString!=null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString=context.allSwitchJsonStrlist.getNext();
+					} 
+					json['switchs']=myArray;
+					var strjson=JSON.stringify(json);
+					context.print(strjson);
+					context.sendjsonstr.setValue(strjson);
+					
+				]]></script>
+					<file method="writefile" name="context.filepath.toString()" data="context.sendjsonstr.toMessageBlock()"/>
+				</function>
+				
+				
+				
+			<function name="SendDetails">	
+				<parameters>
+					<string name="transportid"/>
+					<string name="datapathid"/>
+					<string name="isExists"/>
+				</parameters>
+				
+				<if cond="context.switchContainer.hasValue(context.datapathid.toString())==true">
+					<then>
+						<set name="context.isExists" value="'true'"/>
+						<log>518:true</log>
+					</then>
+					<else>
+						<set name="context.isExists" value="'false'"/>
+						<log>522:false</log>
+					</else>
+				</if>
+				
+				<object name="switch"/>
+				<function name="getSwitch">
+					<parameters>
+						<string name="datapathid" in="context.datapathid.toString()"/>
+						<object name="oneswitch" out="context.switch"/>
+					</parameters>
+				</function>
+				<if cond="context.switch.ptr!=null">
+					<then>
+						<function name="SendDetails" class="context.switch">
+							<parameters>
+								<string name="transportid" in="context.transportid.toString()"/>
+							</parameters>
+						</function>
+					</then>
+				</if>
+			</function>
+		</public>
+	</class>
+</starlang>

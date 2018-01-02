@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<starosxml  scope="application">
+<starlang  scope="application">
 	<function name="startstarfaceserverprocess">
 		<function name="LoadProject">
 			<parameters>
-				<parameter name="strpath" type="string" in="'/opt/staros.xyz/starfaceserver/'"/>
+				<string name="strpath" in="'/opt/staros.xyz/starfaceserver/'"/>
 			</parameters>
 		</function>
 		<function>
 			<log>Start StarCore System Process</log>
 			<function name="StartProcess">
 				<parameters>
-					<parameter name="processname" type="string" in="'STARFACESERVER'"/>
-					<parameter name="autostart" type="string" in="'Disable'"/>
-					<parameter name="version" type="string" in="'1.2.2'"/>
-					<parameter name="category" type="string" in="'Drivers'"/>
-					<parameter name="origin" type="string" in="'StarOS.xyz'"/>
-					<parameter name="title" type="string" in="'Default Apps'"/>
-					<parameter name="desc" type="string" in="'Default Apps'"/>
-					<parameter name="url" type="string" in="'http://www.staros.xyz'"/>
+					<string name="processname" in="'STARFACESERVER'"/>
+					<string name="autostart" in="'Disable'"/>
+					<string name="version" in="'1.2.2'"/>
+					<string name="category" in="'Drivers'"/>
+					<string name="origin" in="'StarOS.xyz'"/>
+					<string name="title" in="'Default Apps'"/>
+					<string name="desc" in="'Default Apps'"/>
+					<string name="url" in="'http://www.staros.xyz'"/>
 				</parameters>
 			</function>	
 		</function>
 	</function>
-</starosxml>
+</starlang>

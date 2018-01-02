@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<starlang xmlns="http://www.staros.xyz/starcore" scope="application">
+	<function name="HandlGUIRequest">
+		<parameters>
+			<string name="requestpath"/>
+			<string name="method"/>
+			<string name="eventdata"/>
+			<string name="transportid"/>
+			<string name="cookie"/>
+		</parameters>
+		<string name="contenttype"/>
+		<params name="httpparam"/>
+		<string name="usersession"/>
+		<string name="usernameparam"/>
+		<string name="filename"/>
+		<string name="filepath"/>
+		<string name="xmldata"/>
+		<string name="passwordparam"/>
+		<string name="authresult"/>
+		<messageblock name="authresultmsg"/>
+		<string name="authjson"/>
+		<string name="sendjsessionid"/>
+		<object name="sessionobj"/>
+		<string name="appname"/>
+		<string name="injson"/>
+		<string name="outjson"/>
+		<string name="username"/>
+		<function>
+			<!--qiulie-->
+			<log level="100">#################################################################################</log>
+			<log level="100"><![CDATA[requestpath = <%=context.requestpath.toString()%>]]></log>
+			<log level="100"><![CDATA[method = <%=context.method.toString()%>]]></log>
+			<log level="100"><![CDATA[eventdata = <%=context.eventdata.toString()%>]]></log>
+			<log level="100"><![CDATA[transportid = <%=context.transportid.toString()%>]]></log>
+			<log level="100"><![CDATA[cookie = <%=context.cookie.toString()%>]]></log>
+			<log level="100">#################################################################################</log>
+			<log level="10">
+				<![CDATA[restfulrequest eventname <%=event.getName()%>]]>
+			</log>
+			<log>
+				<![CDATA[restfulrequest transportid '<%=event.getParam("transportid").toString()%>']]>
+			</log>
+			<log level="10">
+				<![CDATA[restfulrequest eventdata '<%=event.getParam("eventdata").toString()%>']]>
+			</log>
+			<log level="10">
+				<![CDATA[restfulrequest requestpath '<%=event.getParam("requestpath").toString()%>']]>
+			</log>
+			<log level="10">
+				<![CDATA[restfulrequest method '<%=event.getParam("method").toString()%>']]>
+			</log>
+			<log level="10">
+				<![CDATA[cookie= '<%=event.getParam("cookie").toString()%>']]>
+			</log>
+			<!--hu!!! get Jessionid-->
+			<if cond="event.getParam('cookie').toString()!=''">
+				<then>
+					<script>
+						<![CDATA[
+						function trim(s){
+							return trimRight(trimLeft(s));
+						}
+						function trimLeft(s){
+							if(s == null) {
+								return "";
+							}
+							var whitespace = new String(" \t\n\r");
+							var str = new String(s);
+							if (whitespace.indexOf(str.charAt(0)) != -1) {
+								var j=0, i = str.length;
+								while (j < i && whitespace.indexOf(str.charAt(j)) != -1){
+									j++;
+								}
+								str = str.substring(j, i);
+							}
+							return str;
+						}
+						function trimRight(s){
+							if(s == null) return "";
+							var whitespace = new String(" \t\n\r");
+							var str = new String(s);
+							if (whitespace.indexOf(str.charAt(str.length-1)) != -1){
+								var i = str.length - 1;
+								while (i >= 0 && whitespace.indexOf(str.charAt(i)) != -1){
+									i--;
+								}
+								str = str.substring(0, i+1);
+							}
+							return str;
+						}
+						var cookies=event.getParam('cookie').toString();
+						var arraycookies = cookies.split(";");
+						for(var i=0;i<arraycookies.length;i++){
+							var onecookie = arraycookies[i];
+							var arrayparam = onecookie.split("=");
+							if (arrayparam.length==2){
+								var paramname = trim(arrayparam[0]);
+		
+								var paramvalue = trim(arrayparam[1]);
+		
+								if (paramname=="JSESSIONID"){
+									context.usersession.setValue(""+paramvalue);
+			
+									break;
+								}
+							}
+						}
+						]]>
+					</script>
+					<log level="10">FindSession</log>
+					<function name="FindSession" class="SessionManager">
+						<parameters>
+							<string name="sessionid" in="context.usersession.toString()"/>
+							<object name="sessionobj" out="context.sessionobj"/>
+						</parameters>
+					</function>
+					<if cond="context.sessionobj.getValue()==null">
+						<then>
+							<log level="10">can not find the session object</log>
+						</then>
+						<else>
+							<log level="10">find the session object</log>
+						</else>
+					</if>
+				</then>
+			</if>
+
+			<!-- hu verification user and password-->
+			<if cond="context.requestpath.toString() == '/starface/ui/j_security_check'">
+				<then>
+					<log level="10">/starface/j_security_check</log>
+					<if cond="event.getParam('eventdata').toString()==''">
+						<then>
+							<exit/>
+						</then>
+						<else>
+							<function>
+								<script>
+									<![CDATA[
+									var x = event.getParam("eventdata").toString();
+									//j_username=karaf&j_password=karaf
+									var username=(x.split("&")[0]).split("=")[1];
+									var password=(x.split("&")[1]).split("=")[1];	
+									context.usernameparam.setValue(username);
+									context.passwordparam.setValue(password);
+									]]>
+								</script>
+								<log level="10">
+									<![CDATA[username= '<%=context.usernameparam.toString()%>']]>
+								</log>
+								<log level="10">
+									<![CDATA[password= '<%=context.passwordparam.toString()%>']]>
+								</log>
+								<reference variable="injson">
+									<jsonbody>
+										<![CDATA[
+										{
+										"username":"<%=context.usernameparam.toString()%>",
+										"password":"<%=context.passwordparam.toString()%>"
+										}
+										]]>
+									</jsonbody>
+								</reference>
+								<localcall method="AuthRequest" inparam="context.injson" outparam="context.outjson"/>
+								<script>
+									<![CDATA[
+									var info = JSON.parse(context.outjson.toString());
+									context.authresult.setValue(info.result);
+									]]>
+								</script>
+								<if cond="context.authresult.toString() == 'ok'">
+									<then>
+										<function>
+											<log level="10">
+												<![CDATA[auth ok transportid= '<%=context.transportid.toString()%>']]>
+											</log>
+											<set name="httpparam" paramname="Location" value="'/starface/ui/index.html'"/>
+											<set name="sendjsessionid" value="context.randjsessionid()"/>
+											<set name="httpparam" paramname="Set-Cookie" value="'JSESSIONID='+context.sendjsessionid.toString()+'; path=/'"/>
+											<function name="CreateSession" class="SessionManager">
+												<parameters>
+													<string name="sessionid" in="context.sendjsessionid.toString()"/>
+													<string name="username" in="context.usernameparam.toString()"/>
+												</parameters>
+											</function>
+											
+											<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
+											<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+											
+										</function>
+
+									</then>
+									<else>
+										<log level="10">auth failure</log>
+										<function>
+											<set name="httpparam" paramname="Location" value="'/starface/ui/error.html'"/>
+											<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
+											<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+										</function>
+									</else>
+								</if>
+							</function>
+						</else>
+					</if>
+				</then>
+				<!-- hu get application contents-->
+				<elseif cond="context.requestpath.toString() == '/starface/ui/websock/core'">
+					<function>
+						<if cond="event.getParam('Authorization')==''">
+							<then>
+								<if cond="context.sessionobj.getValue()!=null">
+									<then>
+										<function name="ResetTime" class="sessionobj"/>
+										<log level="10">
+											<![CDATA[get a web socket connect= '<%=context.transportid.toString()%>']]>
+										</log>
+										<websocket name="restfulserver" method="AcceptWebSocket" transportid="context.transportid.toString()" openevent="websocketopen" dataevent="websocketdata" disconnectevent="websocketdisconnect"/>
+									</then>
+									<else>
+										<log level="10">
+											<![CDATA[get a web socket connect= '<%=context.transportid.toString()%>']]>
+										</log>
+										<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
+										<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
+										<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+									</else>
+								</if>
+							</then>
+							<else>
+								<script>
+									<![CDATA[
+
+									var strs = event.getParam("Authorization").toString();
+									var str=strs.split(" ")[1];
+
+									var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9+/=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/rn/g,"n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
+
+									var decodedString = Base64.decode(str);
+									var username=decodedString.split(":")[0];
+									context.print("251行"+username);
+									
+									
+									var password=decodedString.split(":")[1];
+									context.print("255行"+password);
+									
+									context.usernameparam.setValue(username);
+									context.passwordparam.setValue(password);
+									]]>
+								</script>
+
+								<reference variable="injson">
+									<jsonbody>
+										<![CDATA[
+										{
+										"username":"<%=context.usernameparam.toString()%>",
+										"password":"<%=context.passwordparam.toString()%>"
+										}
+										]]>
+									</jsonbody>
+								</reference>
+								<localcall method="AuthRequest" inparam="context.injson" outparam="context.outjson"/>
+								<log level="10">
+									<![CDATA[AuthRequest injson= '<%=context.injson.toString()%>']]>
+								</log>
+								<log level="10">
+									<![CDATA[AuthRequest outparam= '<%=context.outjson.toString()%>']]>
+								</log>
+								<script>
+									<![CDATA[
+									var info = JSON.parse(context.outjson.toString());
+									context.authresult.setValue(info.result);
+									]]>
+								</script>
+								<log level="10">
+									<![CDATA[auth reply json= '<%=context.authjson.toString()%>']]>
+								</log>
+								<if cond="context.authresult.toString() == 'ok'">
+									<then>
+										<websocket name="restfulserver" method="AcceptWebSocket" transportid="context.transportid.toString()" openevent="websocketopen" dataevent="websocketdata" disconnectevent="websocketdisconnect"/>
+									</then>
+									<else>
+										<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
+										<set name="httpparam" paramname="Connection" value="'Close'"/>
+										<set name="httpparam" paramname="WWW-Authenticate" value="'Basic realm=\'StarOSDocs\''"/>
+										<restful name="restfulserver" action="RESPONSE" status="403" text="ok" transportid="context.transportid.toString()" httpparams="httpparam"/>
+										<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+									</else>
+								</if>
+
+							</else>
+						</if>
+					</function>
+			</elseif>
+				<elseif cond="context.requestpath.toString() == '/starface/ui/rs/logout'">
+					<function>
+						<!--hu!!!-->
+						<function name="RemoveSession" class="SessionManager">
+							<parameters>
+								<string name="sessionid" in="context.sendjsessionid.toString()"/>
+							</parameters>
+						</function>
+						<log level="10">
+							<![CDATA[get a web socket connect= '<%=context.transportid.toString()%>']]>
+						</log>
+						<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
+						<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
+						<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+					</function>
+				</elseif>
+				<elseif cond="context.requestpath.toString() == '/starface/ui/login.html'">
+					<function>
+						<script>
+							<![CDATA[
+							var x = context.requestpath.toString();
+							var filename="/opt/staros.xyz/starface/html"+x;
+							context.filepath.setValue(filename);
+							context.contenttype.setValue('text/html');
+							]]>
+						</script>
+						<log level="10">Request Login</log>
+						<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
+						<set name="httpparam" paramname="Connection" value="'Close'"/>
+						<set name="httpparam" paramname="Content-Type" value="context.contenttype.toString()"/>
+						<restful name="restfulserver" action="RESPONSE" status="200" text="ok" transportid="context.transportid.toString()" httpparams="httpparam">
+							<html file="context.filepath"/>
+							<log level="10">
+								<![CDATA[344 = '<%=context.filepath.toString()%>']]>
+							</log>
+						</restful>
+						<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+					</function>
+				</elseif>
+				
+				
+				<elseif cond="context.requestpath.toString() == '/starface/ui/onos.js'">
+					<function>
+						<script><![CDATA[
+							var x = context.requestpath.toString();
+							var filename="/opt/staros.xyz/starface/html"+x;
+							context.filepath.setValue(filename);
+							context.contenttype.setValue('text/javascript');
+						  ]]></script>
+						<if cond="context.sessionobj.getValue()!=null">
+							<then>
+								<function name="ResetTime" class="sessionobj"/>
+								<log><![CDATA[ send filepath= <%=context.filepath.toString()%>]]></log>
+								<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
+								<set name="httpparam" paramname="Connection" value="'Close'"/>
+								<set name="httpparam" paramname="Content-Type" value="context.contenttype.toString()"/>
+								<restful name="restfulserver" action="RESPONSE" status="200" text="ok" transportid="context.transportid.toString()" httpparams="httpparam">
+									<html file="context.filepath"/>
+								</restful>
+								<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+							</then>
+							<else>
+								<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
+								<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
+								<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+							</else>
+						</if>
+					</function>
+				</elseif>
+				
+				
+				<elseif cond="context.requestpath.toString() == '/starface/ui/error.html'">
+					<function>
+						<script>
+							<![CDATA[
+							var x = context.requestpath.toString();
+							var filename="/opt/staros.xyz/starface/html"+x;
+							context.filepath.setValue(filename);
+							context.contenttype.setValue('text/html');
+							]]>
+						</script>
+						<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
+						<set name="httpparam" paramname="Connection" value="'Close'"/>
+						<set name="httpparam" paramname="Content-Type" value="context.contenttype.toString()"/>
+						<restful name="restfulserver" action="RESPONSE" status="200" text="ok" transportid="context.transportid.toString()" httpparams="httpparam">
+							<html file="context.filepath"/>
+						</restful>
+						<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+					</function>
+				</elseif>
+				<elseif cond="context.requestpath.toString() == '/starface/ui/index.html'">
+					<function>
+						<script>
+							<![CDATA[
+							var x = context.requestpath.toString();
+							var filename="/opt/staros.xyz/starface/html"+x;
+							context.filepath.setValue(filename);
+							context.contenttype.setValue('text/html');
+							]]>
+						</script>
+						<if cond="context.sessionobj.getValue()==null">
+							<then>
+								<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
+								<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
+								<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+								<exit/>
+							</then>
+						</if>
+						<function name="ResetTime" class="sessionobj"/>
+						<function name="GetUsername" class="sessionobj">
+							<parameters>
+								<string name="username" out="context.username"/>
+							</parameters>
+						</function>
+						<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
+						<set name="httpparam" paramname="Connection" value="'Close'"/>
+						<set name="httpparam" paramname="Content-Type" value="context.contenttype.toString()"/>
+						<restful name="restfulserver" action="RESPONSE" status="200" text="ok" transportid="context.transportid.toString()" httpparams="httpparam">
+							<html file="context.filepath"/>
+						</restful>
+						<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+					</function>
+				</elseif>
+				<else>
+
+					<!--yige start-->
+					<script>
+						<![CDATA[
+						var x = context.requestpath.toString();
+						var filename="/opt/staros.xyz/starface/html"+x;
+						context.filepath.setValue(filename);
+						if(x.indexOf(".html") > 0 )
+						{
+						context.contenttype.setValue('text/html');
+						}
+						else if (x.indexOf(".png")>0)
+						{
+						context.contenttype.setValue('image/png');
+						}
+						else if (x.indexOf(".js")>0)
+						{
+						context.contenttype.setValue('text/javascript');
+						}
+						else if (x.indexOf(".css")>0)
+						{
+						context.contenttype.setValue('text/css');
+						}
+						else if (x.indexOf(".gif")>0)
+						{
+						context.contenttype.setValue('image/gif');
+						}
+						else if (x.indexOf(".woff")>0)
+						{
+						context.contenttype.setValue('application/x-font-woff');
+						}
+						else if (x.indexOf(".ttf")>0)
+						{
+						context.contenttype.setValue('application/x-font-woff');
+						}
+						else
+						{
+						context.contenttype.setValue('text/html');
+						}
+
+						]]>
+					</script>
+					<!--yige end-->
+					<!--hu!!!-->
+					<if cond="context.sessionobj.getValue()!=null">
+						<then>
+							<function name="ResetTime" class="sessionobj"/>
+						</then>
+					</if>
+					<log level="10">
+						<![CDATA[ send filepath= <%=context.filepath.toString()%>]]>
+					</log>
+					<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
+					<set name="httpparam" paramname="Connection" value="'Close'"/>
+					<set name="httpparam" paramname="Content-Type" value="context.contenttype.toString()"/>
+					<restful name="restfulserver" action="RESPONSE" status="200" text="ok" transportid="context.transportid.toString()" httpparams="httpparam">
+						<html file="context.filepath"/>
+					</restful>
+					<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
+				</else>
+			</if>
+		</function>
+	</function>
+	<events>
+
+		<onevent event="restfulrequest.event">
+			
+			<params name="httpparam"/>
+			<string name="transportid"/>
+			<messageblock name="authresultmsg"/>
+			<string name="requestpath"/>
+	
+			<boolean name="ishavesession"/>
+			<boolean name="isDocReqeust" value="false"/>
+	
+			<boolean name="isWebSocket" value="false"/>
+			<boolean name="isUi" value="false"/>
+			<boolean name="isBadRequest" value="false"/>
+			<function>
+				<!--qiulie-->
+				<set name="transportid" value="event.getParam('transportid').toString()"/>
+				<set name="requestpath" value="event.getParam('requestpath').toString()"/>
+				<log level="10">========================================================================</log>
+				<log level="10"><![CDATA[restfulrequest eventname <%=event.getName()%>]]> </log>
+				<log level="10"><![CDATA[restfulrequest transportid '<%=event.getParam("transportid").toString()%>']]></log>
+				<log level="10"><![CDATA[restfulrequest eventdata '<%=event.getParam("eventdata").toString()%>']]></log>
+				<log level="10"><![CDATA[restfulrequest requestpath '<%=event.getParam("requestpath").toString()%>']]></log>
+				<log level="10"><![CDATA[restfulrequest method '<%=event.getParam("method").toString()%>']]></log>
+				<log level="10"><![CDATA[cookie= '<%=event.getParam("cookie").toString()%>']]></log>
+				<log level="10">========================================================================</log>
+				<!--hu!!!-->
+				<script><![CDATA[
+					var x = context.requestpath.toString();
+					 if (x.indexOf("/starface/ui/")>=0)
+					{
+						context.isUi.setValue(true);
+					}
+					else
+					{
+						context.isBadRequest.setValue(true);
+					}
+				  ]]></script>
+				<!--hu control all gui-->
+				
+					<if cond="context.isUi.toBoolean()==true">
+						<then>
+							<function name="HandlGUIRequest">
+								<parameters>
+									<string name="requestpath" in="event.getParam('requestpath').toString()"/>
+									<string name="method" in="event.getParam('method').toString()"/>
+									<string name="eventdata" in="event.getParam('eventdata').toString()"/>
+									<string name="transportid" in="event.getParam('transportid').toString()"/>
+									<string name="cookie" in="event.getParam('cookie').toString()"/>
+								</parameters>
+							</function>
+						</then>
+						<else>
+							<log>bad request</log>
+							<function name="HandlGUIRequest">
+								<parameters>
+									<string name="requestpath" in="event.getParam('requestpath').toString()"/>
+									<string name="method" in="event.getParam('method').toString()"/>
+									<string name="eventdata" in="event.getParam('eventdata').toString()"/>
+									<string name="transportid" in="event.getParam('transportid').toString()"/>
+									<string name="cookie" in="event.getParam('cookie').toString()"/>
+								</parameters>
+							</function>
+						</else>
+				</if>
+			</function>
+		</onevent>
+		<onevent event="websocketopen">
+			<function>			
+				<log level="1"><![CDATA[ websocketopen event <%=event.getName()%>]]> </log>				
+				<log level="1"><![CDATA[ websocketopen transportid <%=event.getParam("transportid").toString()%>]]> </log>
+			</function>
+		</onevent>
+		<onevent event="websocketdisconnect">
+			<function>
+				
+				<log><![CDATA[ websocketdisconnect transportid <%=event.getParam("transportid").toString()%>]]> </log>
+				<!--remove name="websocketclients" value="event.getParam('transportid').toString()"/>-->
+			</function>
+		</onevent>
+		<onevent event="websocketdata">
+			<string name="type"/>
+			<function>
+				<script><![CDATA[
+					var info = JSON.parse(event.getParam('eventdata').toString());
+					context.print(event.getParam('eventdata').toString());
+					context.type.setValue(info.event);
+				]]></script>
+			</function>
+			<!-- YY -->
+			<if cond="context.type.toString()=='addSpecialLine'">
+				<then>
+					<log level="100">context.type = addSpecialLine</log>
+					<function name="addSpecialLine" class="SpecialLineMgr"/>
+					<exit/>
+				</then>
+					
+				<elseif cond="context.type.toString()=='updatePrefReq'">			
+						<function name="updatePrefReq" class="TopoManager"/>
+						<exit/>
+				</elseif>
+				<elseif cond="context.type.toString()=='requestSummary'">	
+						<function name="requestSummary" class="TopoManager"/>
+						<exit/>
+				</elseif>
+				<elseif cond="context.type.toString()=='topoStart'">
+						<function name="topoStart" class="TopoManager"/>
+						<exit/>
+				</elseif>
+				<elseif cond="context.type.toString()=='requestDetails'">
+						<function name="requestDetails" class="TopoManager"/>
+						<exit/>
+				</elseif>
+				<elseif cond="context.type.toString()=='specialLineDataRequest'">
+					<log level="100">context.type = specialLineDataRequest</log>
+					<function name="getallSpecialLines" class="SpecialLineMgr"/>
+					<exit/>
+				</elseif>
+				<elseif cond="context.type.toString()=='updatespecialLine'">
+					<log level="100">context.type = updatespecialLine</log>
+					<function name="updateSpecialLine" class="SpecialLineMgr"/>
+					<exit/>
+				</elseif>
+				<elseif cond="context.type.toString() == 'deletespecialLine'">
+					<log level="100">context.type = deletespecialLine</log>
+					<function name="deleteSpecialLine" class="SpecialLineMgr"/>
+					<exit/>
+				</elseif>
+				<elseif cond="context.type.toString() == 'getLastSpecialLine'">
+					<log level="100">context.type = getLastSpecialLine</log>
+					<function name="getLastSpecialLine" class="SpecialLineMgr"/>
+					<exit/>
+				</elseif>
+				<elseif cond="context.type.toString() == 'getonespecilLine'">
+					<log level="100">context.type = getonespecilLine</log>
+					<function name="getSpecialLine" class="SpecialLineMgr"/>
+					<exit/>
+				</elseif>
+				<elseif cond="context.type.toString() == 'ConfigDataRequest'">
+					<function name="handleData" class="ConfigMgr"/>
+				</elseif>
+				<!--qiulei 20171207-->
+				<elseif cond="context.type.toString() == 'faultStatisticsDataRequest'">
+					<log level="100">context.type = faultStatisticsDataRequest ------starfaceserverhttp.xml ------600行</log>
+					<function name="getTestJson" class="FaultStatisticsMgr"/>
+					<log level="100">getTestJson函数执行完毕------starfaceserverhttp.xml ------602行</log>
+					<exit/>
+				</elseif>
+
+				<!-- YY 20180102 -->
+				<elseif cond="context.type.toString() == 'getAllDeviceMapRequest'">
+					<function name="getAllDeviceMap"/>
+					<exit/>
+				</elseif>
+				<elseif cond="context.type.toString() == 'handleDeviceMap'">
+					<function name="handleDeviceMap"/>
+					<exit/>
+				</elseif>
+				<!-- YY 20180102 -->
+
+				<elseif cond="context.type.toString() == 'getDevicename'">
+					<string name="devicename" value="context.ByChineseNameFindNumberMapObj.toJson()"/>
+					<log level="100"><![CDATA[devicename= '<%=context.devicename.toString()%>']]></log>
+					<string name="strjson"/>
+					<script><![CDATA[
+						var json=new Object();
+						var devicename = JSON.parse(context.devicename.toString());
+						json['event']='DevicenameResponse';
+						json['payload']=devicename;
+						var strjson=JSON.stringify(json);
+						context.print(strjson);
+						context.strjson.setValue(strjson);
+				  ]]></script>
+				<function>
+					<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+						<jsonsrc src="strjson"/>
+					</websocket>
+				</function>
+				</elseif>
+				
+				<else>
+					<exit/>
+				</else>				
+			</if>
+			<!-- YY -->
+			
+		</onevent>
+		<onevent event="*">
+			<function>
+			<log level="1"><![CDATA[ invalid event <%=event.getName().toString()%>]]> </log>
+			<log level="1"><![CDATA[ invalid param <%=event.getParam("eventdata").toString()%>]]> </log>
+			</function>
+		</onevent>
+	</events>
+</starlang>

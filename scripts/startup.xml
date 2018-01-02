@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<starosxml  scope="application">
+<starlang  scope="application">
 	<include src="/opt/staros.xyz/dipc/scripts/startprocess.xml"/>
 	<include src="/opt/staros.xyz/starcore/scripts/starcore_process_map.xml"/>
 	<include src="/opt/staros.xyz/starfaceserver/scripts/starfaceserver_process_init.xml"/>
 	<!--load src="/opt/staros.xyz/starcore/scripts/starcore_process_map.xml"/>
 	<load src="/opt/staros.xyz/starfaceserver/scripts/starfaceserver_process_init.xml"/-->
-	<variable name="newSession"/>
-	<variable name="nulltest" type="string"/>
-	<variable name="systemparam" type="params"/>
+	<string name="nulltest"/>
+	<params name="systemparam"/>
 	<function name="StartProcess">
 		<parameters>
-			<parameter name="processname" type="string"/>
-			<parameter name="autostart" type="string"/>
+			<string name="processname"/>
+			<string name="autostart"/>
 		</parameters>
-		<variable name="starparams" type="params"/>
+		<params name="starparams"/>
 		<set name="starparams" paramname="ProcessName" value="context.processname.toString()"/>
 		<set name="starparams" paramname="AutoRestart" value="context.autostart.toString()"/>
 		<remotecall method="StartProcess" params="context.starparams"/>
@@ -66,4 +65,4 @@
 			</function>
 		</onevent>
 	</events>
-</starosxml>
+</starlang>

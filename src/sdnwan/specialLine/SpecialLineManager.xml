@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		specialLine.xml
+	@brief 		专线
+	@version 	1.1.0
+	@auth 		YY
+	@date		2017/11/28
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">	
+	<class name="SpecialLineManager">
+		<private>
+			<object name="m_db"/>
+			<params name="dbparams"/>
+		</private>
+		<public>
+			<function name="SpecialLineManager">
+				<log>SpecialLineManager was created</log>
+				<set name="dbparams" paramname="dbname" value="'specialline'"/>
+				<set name="dbparams" paramname="dbtype" value="'sqlite'"/>
+				<database name="m_db" method="Open" params="context.dbparams"/>
+				<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000" detachclass="true">
+					<log level="100"><![CDATA[open database db name <%=event.getName().toString()%>]]></log>
+					<log level="100"><![CDATA[open database db result <%=event.getParam('result').toString()%>]]></log>
+					<log level="100"><![CDATA[open database db description <%=event.getParam('description').toString()%>]]></log>
+					<log level="100"><![CDATA[open database db transportid <%=event.getParam('transportid').toString()%>]]></log>
+					<log level="100"><![CDATA[open database db eventdata <%=event.getParam('eventdata').toString()%>]]></log>
+				</wait>
+				<database name="m_db" method="ExecSQL">
+					<sql><![CDATA[
+
+						create table if not exists COMPANY(
+
+						ID 					TEXT 	PRIMARY KEY     NOT NULL,
+
+						USERNAME        	TEXT    NOT NULL,
+
+						TYPE            	TEXT    NOT NULL,
+
+						INPUTPORT        	TEXT 	NOT NULL,
+
+						OUTPUTPORT         	TEXT 	NOT NULL,
+
+						INPUTTUNNELPORT     TEXT 	NOT NULL,
+
+						OUTPUTTUNNELPORT    TEXT 	NOT NULL,
+
+						INPUTVXLANPORT      TEXT 	NOT NULL,
+
+						OUTPUTVXLANPORT     TEXT 	NOT NULL,
+
+						INPUTVLANID         TEXT 	NOT NULL,
+
+						OUTPUTVLANID        TEXT 	NOT NULL,
+
+						BANDWIDTH         	TEXT 	NOT NULL
+
+						);
+
+					]]></sql>
+				</database>
+				<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+					<log><![CDATA[create table result <%=event.getParam('result').toString()%>]]></log>
+					<log><![CDATA[create table description <%=event.getParam('description').toString()%>]]></log>
+					<log><![CDATA[create table transportid <%=event.getParam('transportid').toString()%>]]></log>
+					<log><![CDATA[create table eventdata <%=event.getParam('eventdata').toString()%>]]></log>
+				</wait>
+			</function>
+			<!--
+				@brief		添加一个专线
+				@auth 		YY
+				@date		2017/11/29
+				Input:
+				Output:
+			-->
+			<function name="addSpecialLine">
+				<log level="100">insert addSpecialLine</log>
+				<string name="urlvar"/>				
+				<string name="resourceid"/>
+				<string name="username"/>
+				<string name="type"/>
+				<string name="inputPort"/>
+				<string name="outputPort"/>
+				<string name="inputtunnelport"/>
+				<string name="outputtunnelport"/>
+				<string name="inputvxlanport"/>
+				<string name="outputvxlanport"/>
+				<string name="inputvlanid"/>
+				<string name="outputvlanid"/>
+				<string name="bandwidth"/>
+				<string name="strjson"/>
+				<string name="outdata"/>
+				<string name="cn_inputPort"/>
+				<string name="cn_outputPort"/>
+				<string name="cn_inputtunnelport"/>
+				<string name="cn_outputtunnelport"/>
+				<string name="cn_inputvxlanport"/>
+				<string name="cn_outputvxlanport"/>
+				<set name="urlvar" value="'http://127.0.0.1:9922/onos/v1/tunnelservice/tunnel'"/>
+				<script><![CDATA[
+					context.username.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.username.toString())
+					context.type.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.Ttype.toString())
+
+					var js_inputPort = JSON.parse(event.getParam('eventdata').toString()).payload.inputPort.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_inputPort.split("/")[0])) {
+						var inputPort_final = context.ByChineseNameFindNumberMapObj.getParam(js_inputPort.split("/")[0]).toString()
+						context.inputPort.setValue("of:" + inputPort_final + "/" + js_inputPort.split("/")[1])
+					} else {
+						context.inputPort.setValue(js_inputPort)
+					}
+					context.cn_inputPort.setValue(js_inputPort)
+
+					var js_outputPort = JSON.parse(event.getParam('eventdata').toString()).payload.outputPort.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_outputPort.split("/")[0])) {
+						var outputPort_final = context.ByChineseNameFindNumberMapObj.getParam(js_outputPort.split("/")[0]).toString()
+						context.outputPort.setValue("of:" + outputPort_final + "/" + js_outputPort.split("/")[1])
+					} else {
+						context.outputPort.setValue(js_outputPort)
+					}
+					context.cn_outputPort.setValue(js_outputPort)
+
+					var js_inputtunnelport = JSON.parse(event.getParam('eventdata').toString()).payload.inputtunnel.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_inputtunnelport.split("/")[0])) {
+						var inputtunnelport_final = context.ByChineseNameFindNumberMapObj.getParam(js_inputtunnelport.split("/")[0]).toString()
+						context.inputtunnelport.setValue("of:" + inputtunnelport_final + "/" + js_inputtunnelport.split("/")[1])
+					} else {
+						context.inputtunnelport.setValue(js_inputtunnelport)
+					}
+					context.cn_inputtunnelport.setValue(js_inputtunnelport)
+
+					var js_outputtunnelport = JSON.parse(event.getParam('eventdata').toString()).payload.outputtunnel.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_outputtunnelport.split("/")[0])) {
+						var outputtunnelport_final = context.ByChineseNameFindNumberMapObj.getParam(js_outputtunnelport.split("/")[0]).toString()
+						context.outputtunnelport.setValue("of:" + outputtunnelport_final + "/" + js_outputtunnelport.split("/")[1])
+					} else {
+						context.outputtunnelport.setValue(js_outputtunnelport)
+					}
+					context.cn_outputtunnelport.setValue(js_outputtunnelport)
+
+					var js_inputvxlanport = JSON.parse(event.getParam('eventdata').toString()).payload.inportvxlanport.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_inputvxlanport.split("/")[0])) {
+						var inputvxlanport_final = context.ByChineseNameFindNumberMapObj.getParam(js_inputvxlanport.split("/")[0]).toString()
+						context.inputvxlanport.setValue("of:" + inputvxlanport_final + "/" + js_inputvxlanport.split("/")[1])
+					} else {
+						context.inputvxlanport.setValue(js_inputvxlanport)
+					}
+					context.cn_inputvxlanport.setValue(js_inputvxlanport)
+
+					var js_outputvxlanport = JSON.parse(event.getParam('eventdata').toString()).payload.outportvxlanport.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_outputvxlanport.split("/")[0])) {
+						var outputvxlanport_final = context.ByChineseNameFindNumberMapObj.getParam(js_outputvxlanport.split("/")[0]).toString()
+						context.outputvxlanport.setValue("of:" + outputvxlanport_final + "/" + js_outputvxlanport.split("/")[1])
+					} else {
+						context.outputvxlanport.setValue(js_outputvxlanport)
+					}
+					context.cn_outputvxlanport.setValue(js_outputvxlanport)
+
+					context.inputvlanid.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.inputvlanid.toString())
+					context.outputvlanid.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.outputvlanid.toString())
+					context.bandwidth.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.bandwidth.toString())
+				]]></script>
+				<log level="100">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</log>
+				<log level="200"><![CDATA[inputPort = <%=context.inputPort.toString()%>]]></log>
+				<log level="200"><![CDATA[outputPort = <%=context.outputPort.toString()%>]]></log>
+				<log level="200"><![CDATA[inputtunnelport = <%=context.inputtunnelport.toString()%>]]></log>
+				<log level="200"><![CDATA[outputtunnelport = <%=context.outputtunnelport.toString()%>]]></log>
+				<log level="200"><![CDATA[inputvxlanport = <%=context.inputvxlanport.toString()%>]]></log>
+				<log level="200"><![CDATA[outputvxlanport = <%=context.outputvxlanport.toString()%>]]></log>
+				<log level="100">vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv</log>
+				<reference variable="strjson">
+					<jsonbody><![CDATA[
+						{
+							"username": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.username.toString()%>",
+							"type": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.Ttype.toString()%>",
+							"inputPort": "<%=context.inputPort.toString()%>",
+							"outputPort": "<%=context.outputPort.toString()%>",
+							"inputtunnelport": "<%=context.inputtunnelport.toString()%>",
+							"outputtunnelport": "<%=context.outputtunnelport.toString()%>",
+							"inputvxlanport": "<%=context.inputvxlanport.toString()%>",
+							"outputvxlanport": "<%=context.outputvxlanport.toString()%>",
+							"inputvlanid": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.inputvlanid.toString()%>",
+							"outputvlanid": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.outputvlanid.toString()%>",
+							"bandwidth": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.bandwidth.toString()%>"
+						}
+					]]></jsonbody>
+				</reference>
+				<function name="AddDataToController">
+					<parameters>
+						<string name="jsondata" in="context.strjson.toString()"/>
+						<string name="url" in="context.urlvar.toString()"/>
+						<string name="outputdata" out="context.outdata"/>
+					</parameters>
+				</function>
+				<if cond="context.outdata.toString() == ''">
+					<then>			
+						<log level="100">response data is null</log>
+						<exit/>
+					</then>
+				</if>	
+				<script><![CDATA[
+					context.resourceid.setValue(JSON.parse(context.outdata.toString()).result.resourceId)
+				]]></script>
+				<!--if cond="context.resourceid.toString() != '-1'">
+					<then-->
+						<database name="m_db" method="ExecSQL">
+							<sql><![CDATA[INSERT INTO COMPANY (ID,USERNAME,TYPE,INPUTPORT,OUTPUTPORT,INPUTTUNNELPORT,OUTPUTTUNNELPORT,INPUTVXLANPORT,OUTPUTVXLANPORT,INPUTVLANID,OUTPUTVLANID,BANDWIDTH) VALUES ('<%=context.resourceid.toString()%>', '<%=context.username.toString()%>', '<%=context.type.toString()%>', '<%=context.cn_inputPort.toString()%>', '<%=context.cn_outputPort.toString()%>', '<%=context.cn_inputtunnelport.toString()%>', '<%=context.cn_outputtunnelport.toString()%>', '<%=context.cn_inputvxlanport.toString()%>', '<%=context.cn_outputvxlanport.toString()%>', '<%=context.inputvlanid.toString()%>', '<%=context.outputvlanid.toString()%>', '<%=context.bandwidth.toString()%>' );;
+							]]></sql>
+						</database>
+						<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+							<log level="100"><![CDATA[insert table result <%=event.getParam('result').toString()%>]]></log>
+							<log level="100"><![CDATA[insert table description <%=event.getParam('description').toString()%>]]></log>
+							<log level="100"><![CDATA[insert table transportid <%=event.getParam('transportid').toString()%>]]></log>
+							<log level="100"><![CDATA[insert table eventdata <%=event.getParam('eventdata').toString()%>]]></log>
+						</wait>
+					<!--/then>
+				</if-->				
+				<function name="getallSpecialLines"/>
+			</function>
+			<!--
+				@brief		获取所有专线
+				@auth 		YY
+				@date		2017/11/29
+				Input:
+				Output:
+			-->
+			<function name="getallSpecialLines">
+				<log level="100">insert getallSpecialLines</log>
+				<string name="detailarray"/>
+				<string name="data"/>
+				<string name="handledata"/>
+				<string name="apijson"/>			
+				<database name="m_db" method="ExecSelectSQL" databindlist="'id{ID:v};username{USERNAME:v};type{TYPE:v};inputPort{INPUTPORT:v};outputPort{OUTPUTPORT:v};inputtunnel{INPUTTUNNELPORT:v};outputtunnel{OUTPUTTUNNELPORT:v};inputvxlanport{INPUTVXLANPORT:v};outputvxlanport{OUTPUTVXLANPORT:v};inputvlanid{INPUTVLANID:v};outputvlanid{OUTPUTVLANID:v};bandwidth{BANDWIDTH:v}'">
+					<sql><![CDATA[
+						SELECT * from COMPANY
+					]]></sql>
+				</database>
+				<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+					<log level="100"><![CDATA[SELECT table result <%=event.getParam('result').toString()%>]]></log>
+					<log level="100"><![CDATA[SELECT table description <%=event.getParam('description').toString()%>]]></log>
+					<log level="100"><![CDATA[SELECT table transportid <%=event.getParam('transportid').toString()%>]]></log>
+					<log level="100"><![CDATA[SELECT table eventdata <%=event.getParam('eventdata').toString()%>]]></log>
+					<set name="context.data" value="event.getParam('eventdata').toString()"/>
+				</wait>
+				<if cond="context.data.toString() != ''">
+					<then>
+						<script><![CDATA[
+							var json = JSON.parse(context.data.toString())
+							context.handledata.setValue(JSON.stringify(json.data))
+						]]></script>
+						<if cond="context.handledata.toString() != 'null'">
+							<then>
+								<script><![CDATA[
+									var json = new Object()									
+									var myarray = new Array()
+									var outjson = new Object()
+									var secondarray = new Array()									
+									var zero = JSON.parse(context.data.toString())
+									for (var i = 0; i < zero.data.length; i++) {
+										var root = JSON.parse(zero.data[i])
+										
+										var root_inputPort = '' + root.inputPort
+										context.print("root_inputPort = " + root_inputPort)
+										context.print(typeof(root_inputPort))										
+										var inputPort = context.ByChineseNameFindNumberMapObj.getParam(root_inputPort.split("/")[0])
+										root.inputPort = 'of:' + inputPort + "/" + root_inputPort.split("/")[1]
+
+										var root_inputtunnel = '' + root.inputtunnel
+										var inputtunnel = context.ByChineseNameFindNumberMapObj.getParam(root_inputtunnel.split("/")[0])
+										root.inputtunnel = 'of:' + inputtunnel + "/" + root_inputtunnel.split("/")[1]
+
+										var root_inputvxlanport = '' + root.inputvxlanport
+										var inputvxlanport = context.ByChineseNameFindNumberMapObj.getParam(root_inputvxlanport.split("/")[0])
+										root.inputvxlanport = 'of:' + inputvxlanport + "/" + root_inputvxlanport.split("/")[1]
+
+										var root_outputPort = '' + root.outputPort
+										var outputPort = context.ByChineseNameFindNumberMapObj.getParam(root_outputPort.split("/")[0])
+										root.outputPort = 'of:' + outputPort + "/" + root_outputPort.split("/")[1]
+
+										var root_outputtunnel = '' + root.outputtunnel
+										var outputtunnel = context.ByChineseNameFindNumberMapObj.getParam(root_outputtunnel.split("/")[0])
+										root.outputtunnel = 'of:' + outputtunnel + "/" + root_outputtunnel.split("/")[1]
+
+										var root_outputvxlanport = '' + root.outputvxlanport
+										var outputvxlanport = context.ByChineseNameFindNumberMapObj.getParam(root_outputvxlanport.split("/")[0])
+										root.outputvxlanport = 'of:' + outputvxlanport + "/" + root_outputvxlanport.split("/")[1]	
+
+										var info = JSON.parse(zero.data[i])
+										info.state = "active"
+										myarray.push(info)
+										secondarray.push(root)
+									}
+									json.event = "specialLineDataResponse"
+									var payload = new Object()
+									payload['specialLine'] = myarray
+									json.payload = payload
+									var strjson = JSON.stringify(json)
+									context.detailarray.setValue(strjson)
+									outjson.specialLine = secondarray
+									context.apijson.setValue(JSON.stringify(outjson))
+								]]></script>
+								<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+									<jsonsrc src="detailarray"/>
+								</websocket>
+								<syslog level="INFO"><![CDATA[add old tunnel = <%=context.apijson.toString()%>]]></syslog>
+								<function name="PostDataToController">
+									<parameters>
+										<string name="jsondata" in="context.apijson.toString()"/>
+										<string name="url" in="'http://127.0.0.1:9922/onos/v1/tunnelservice/tunnel'"/>
+									</parameters>
+								</function>													
+							</then>
+						</if>
+					</then>
+				</if>
+			</function>			
+			<!--
+				@brief		更新一个专线
+				@auth 		YY
+				@date		2017/11/29
+				Input:
+				Output:
+			-->
+			<function name="updateSpecialLine">
+				<log level="100">insert updateSpecialLine</log>
+				<string name="urlvar"/>
+				<string name="code"/>
+				<string name="username"/>
+				<string name="type"/>
+				<string name="inputPort"/>
+				<string name="outputPort"/>
+				<string name="inputtunnelport"/>
+				<string name="outputtunnelport"/>
+				<string name="inputvxlanport"/>
+				<string name="outputvxlanport"/>
+				<string name="inputvlanid"/>
+				<string name="outputvlanid"/>
+				<string name="bandwidth"/>
+				<string name="path"/>
+				<string name="resourceid"/>
+				<string name="strjson"/>
+				<string name="outdata"/>
+				<string name="cn_inputPort"/>
+				<string name="cn_outputPort"/>
+				<string name="cn_inputtunnelport"/>
+				<string name="cn_outputtunnelport"/>
+				<string name="cn_inputvxlanport"/>
+				<string name="cn_outputvxlanport"/>
+				<script><![CDATA[
+					var resourceid = JSON.parse(event.getParam('eventdata').toString()).payload.resourceid				
+					context.resourceid.setValue(resourceid)
+					context.path.setValue('http://127.0.0.1:9922/onos/v1/tunnelservice/tunnel/{' + resourceid + '}')
+				]]></script>
+				<set name="urlvar" value="context.path.toString()"/>
+				<script><![CDATA[
+					context.username.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.username.toString())
+					context.type.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.Ttype.toString())
+
+					var js_inputPort = JSON.parse(event.getParam('eventdata').toString()).payload.inputPort.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_inputPort.split("/")[0])) {
+						var inputPort_final = context.ByChineseNameFindNumberMapObj.getParam(js_inputPort.split("/")[0]).toString()
+						context.inputPort.setValue("of:" + inputPort_final + "/" + js_inputPort.split("/")[1])
+					} else {
+						context.inputPort.setValue(js_inputPort)
+					}
+					context.cn_inputPort.setValue(js_inputPort)
+
+					var js_outputPort = JSON.parse(event.getParam('eventdata').toString()).payload.outputPort.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_outputPort.split("/")[0])) {
+						var outputPort_final = context.ByChineseNameFindNumberMapObj.getParam(js_outputPort.split("/")[0]).toString()
+						context.outputPort.setValue("of:" + outputPort_final + "/" + js_outputPort.split("/")[1])
+					} else {
+						context.outputPort.setValue(js_outputPort)
+					}
+					context.cn_outputPort.setValue(js_outputPort)
+
+					var js_inputtunnelport = JSON.parse(event.getParam('eventdata').toString()).payload.inputtunnel.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_inputtunnelport.split("/")[0])) {
+						var inputtunnelport_final = context.ByChineseNameFindNumberMapObj.getParam(js_inputtunnelport.split("/")[0]).toString()
+						context.inputtunnelport.setValue("of:" + inputtunnelport_final + "/" + js_inputtunnelport.split("/")[1])
+					} else {
+						context.inputtunnelport.setValue(js_inputtunnelport)
+					}
+					context.cn_inputtunnelport.setValue(js_inputtunnelport)
+
+					var js_outputtunnelport = JSON.parse(event.getParam('eventdata').toString()).payload.outputtunnel.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_outputtunnelport.split("/")[0])) {
+						var outputtunnelport_final = context.ByChineseNameFindNumberMapObj.getParam(js_outputtunnelport.split("/")[0]).toString()
+						context.outputtunnelport.setValue("of:" + outputtunnelport_final + "/" + js_outputtunnelport.split("/")[1])
+					} else {
+						context.outputtunnelport.setValue(js_outputtunnelport)
+					}
+					context.cn_outputtunnelport.setValue(js_outputtunnelport)
+
+					var js_inputvxlanport = JSON.parse(event.getParam('eventdata').toString()).payload.inportvxlanport.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_inputvxlanport.split("/")[0])) {
+						var inputvxlanport_final = context.ByChineseNameFindNumberMapObj.getParam(js_inputvxlanport.split("/")[0]).toString()
+						context.inputvxlanport.setValue("of:" + inputvxlanport_final + "/" + js_inputvxlanport.split("/")[1])
+					} else {
+						context.inputvxlanport.setValue(js_inputvxlanport)
+					}
+					context.cn_inputvxlanport.setValue(js_inputvxlanport)
+
+					var js_outputvxlanport = JSON.parse(event.getParam('eventdata').toString()).payload.outportvxlanport.toString()
+					if (context.ByChineseNameFindNumberMapObj.hasParam(js_outputvxlanport.split("/")[0])) {
+						var outputvxlanport_final = context.ByChineseNameFindNumberMapObj.getParam(js_outputvxlanport.split("/")[0]).toString()
+						context.outputvxlanport.setValue("of:" + outputvxlanport_final + "/" + js_outputvxlanport.split("/")[1])
+					} else {
+						context.outputvxlanport.setValue(js_outputvxlanport)
+					}
+					context.cn_outputvxlanport.setValue(js_outputvxlanport)
+
+					context.inputvlanid.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.inputvlanid.toString())
+					context.outputvlanid.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.outputvlanid.toString())
+					context.bandwidth.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.bandwidth.toString())
+				]]></script>
+				<syslog level="INFO"><![CDATA[inputPort = <%=context.inputPort.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[outputPort = <%=context.outputPort.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[inputtunnelport = <%=context.inputtunnelport.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[outputtunnelport = <%=context.outputtunnelport.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[inputvxlanport = <%=context.inputvxlanport.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[outputvxlanport = <%=context.outputvxlanport.toString()%>]]></syslog>
+
+				<syslog level="INFO"><![CDATA[cn_inputPort = <%=context.cn_inputPort.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[cn_outputPort = <%=context.cn_outputPort.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[cn_inputtunnelport = <%=context.cn_inputtunnelport.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[cn_outputtunnelport = <%=context.cn_outputtunnelport.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[cn_inputvxlanport = <%=context.cn_inputvxlanport.toString()%>]]></syslog>
+				<syslog level="INFO"><![CDATA[cn_outputvxlanport = <%=context.cn_outputvxlanport.toString()%>]]></syslog>
+				<reference variable="strjson">
+					<jsonbody><![CDATA[
+						{
+							"username": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.username.toString()%>",
+							"type": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.Ttype.toString()%>",
+							"inputPort": "<%=context.inputPort.toString()%>",
+							"outputPort": "<%=context.outputPort.toString()%>",
+							"inputtunnelport": "<%=context.inputtunnelport.toString()%>",
+							"outputtunnelport": "<%=context.outputtunnelport.toString()%>",
+							"inputvxlanport": "<%=context.inputvxlanport.toString()%>",
+							"outputvxlanport": "<%=context.outputvxlanport.toString()%>",
+							"inputvlanid": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.inputvlanid.toString()%>",
+							"outputvlanid": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.outputvlanid.toString()%>",
+							"bandwidth": "<%=JSON.parse(event.getParam('eventdata').toString()).payload.bandwidth.toString()%>"
+						}
+					]]></jsonbody>
+				</reference>
+				<function name="PutDataToController">
+					<parameters>
+						<string name="jsondata" in="context.strjson.toString()"/>
+						<string name="url" in="context.urlvar.toString()"/>
+						<string name="outputdata" out="context.outdata"/>
+					</parameters>
+				</function>				
+				<log level="100"><![CDATA[bandwidth = <%=context.bandwidth.toString()%>]]></log>
+				<log level="100"><![CDATA[resourceid = <%=context.resourceid.toString()%>]]></log>
+				<if cond="context.outdata.toString() == ''">
+					<then>
+						<exit/>
+					</then>
+				</if>
+				<script><![CDATA[
+					context.code.setValue(JSON.parse(context.outdata.toString()).result.code)
+				]]></script>
+				<!--if cond="context.code.toString() != '-1'">
+					<then-->
+						<database name="m_db" method="ExecSQL">
+							<sql><![CDATA[
+								UPDATE COMPANY set USERNAME='<%=context.username.toString()%>',TYPE='<%=context.type.toString()%>',INPUTPORT='<%=context.cn_inputPort.toString()%>',OUTPUTPORT='<%=context.cn_outputPort.toString()%>',INPUTTUNNELPORT='<%=context.cn_inputtunnelport.toString()%>',OUTPUTTUNNELPORT='<%=context.cn_outputtunnelport.toString()%>',INPUTVXLANPORT='<%=context.cn_inputvxlanport.toString()%>',OUTPUTVXLANPORT='<%=context.cn_outputvxlanport.toString()%>',INPUTVLANID='<%=context.inputvlanid.toString()%>',OUTPUTVLANID='<%=context.outputvlanid.toString()%>',BANDWIDTH='<%=context.bandwidth.toString()%>' where ID = <%=context.resourceid.toString()%>
+							]]></sql>
+						</database>
+						<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+							<log level="100"><![CDATA[UPDATE table result <%=event.getParam('result').toString()%>]]></log>
+							<log level="100"><![CDATA[UPDATE table description <%=event.getParam('description').toString()%>]]></log>
+							<log level="100"><![CDATA[UPDATE table transportid <%=event.getParam('transportid').toString()%>]]></log>
+							<log level="100"><![CDATA[UPDATE table eventdata <%=event.getParam('eventdata').toString()%>]]></log>
+						</wait>
+					<!--/then>
+				</if-->				
+				<function name="getallSpecialLines"/>
+			</function>
+			<!--
+				@brief		获取一个专线
+				@auth 		YY
+				@date		2017/11/29
+				Input:
+				Output:
+			-->
+			<function name="getSpecialLine">
+				<log level="100">insert getSpecialLine</log>
+				<string name="resourceid"/>
+				<string name="data"/>
+				<string name="handledata"/>
+				<string name="detailarray"/>
+				<script><![CDATA[
+					context.resourceid.setValue(JSON.parse(event.getParam('eventdata').toString()).payload.id)
+				]]></script>
+				<database name="m_db" method="ExecSelectSQL" databindlist="'id{ID:v};username{USERNAME:v};type{TYPE:v};inputPort{INPUTPORT:v};outputPort{OUTPUTPORT:v};inputtunnel{INPUTTUNNELPORT:v};outputtunnel{OUTPUTTUNNELPORT:v};inputvxlanport{INPUTVXLANPORT:v};outputvxlanport{OUTPUTVXLANPORT:v};inputvlanid{INPUTVLANID:v};outputvlanid{OUTPUTVLANID:v};bandwidth{BANDWIDTH:v}'">
+					<sql><![CDATA[
+						SELECT * from COMPANY where ID = <%=context.resourceid.toString()%>
+					]]></sql>
+				</database>
+				<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+					<set name="context.data" value="event.getParam('eventdata').toString()"/>
+				</wait>
+				<if cond="context.data.toString() != ''">
+					<then>
+						<script><![CDATA[
+							var json = JSON.parse(context.data.toString())
+							context.handledata.setValue(JSON.stringify(json.data))
+						]]></script>
+						<if cond="context.handledata.toString() != 'null'">
+							<then>
+								<script><![CDATA[
+									var zero = JSON.parse(context.data.toString())
+									var json = new Object()
+									json.event = 'getlastspecialline'
+									var specialline = new Object()
+									specialline.id = JSON.parse(zero.data[0]).id
+									specialline.inputPort = JSON.parse(zero.data[0]).inputPort
+									specialline.inputvlanid = JSON.parse(zero.data[0]).inputvlanid
+									specialline.inputtunnel = JSON.parse(zero.data[0]).inputtunnel
+									specialline.inputvxlanport = JSON.parse(zero.data[0]).inputvxlanport
+									specialline.outputPort = JSON.parse(zero.data[0]).outputPort
+									specialline.outputvlanid = JSON.parse(zero.data[0]).outputvlanid
+									specialline.outputtunnel = JSON.parse(zero.data[0]).outputtunnel
+									specialline.outputvxlanport = JSON.parse(zero.data[0]).outputvxlanport
+									specialline.bandwidth = JSON.parse(zero.data[0]).bandwidth
+									specialline.type = JSON.parse(zero.data[0]).type
+									specialline.state = "active"
+									var payload = new Object()
+									payload.specialLine = specialline
+									json.payload = payload
+									var result = JSON.stringify(json)
+									context.detailarray.setValue(result)
+								]]></script>
+								<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+									<jsonsrc src="detailarray"/>
+								</websocket>
+							</then>
+						</if>
+					</then>
+				</if>
+			</function>
+			<!--
+				@brief		获取最后添加的专线
+				@auth 		YY
+				@date		2017/12/15
+				Input:
+				Output:
+			-->
+			<function name="getLastSpecialLine">
+				<log level="100">insert getLastSpecialLine</log>				
+				<string name="data"/>
+				<string name="handledata"/>
+				<string name="detailarray"/>
+				<database name="m_db" method="ExecSelectSQL" databindlist="'id{ID:v};username{USERNAME:v};type{TYPE:v};inputPort{INPUTPORT:v};outputPort{OUTPUTPORT:v};inputtunnel{INPUTTUNNELPORT:v};outputtunnel{OUTPUTTUNNELPORT:v};inputvxlanport{INPUTVXLANPORT:v};outputvxlanport{OUTPUTVXLANPORT:v};inputvlanid{INPUTVLANID:v};outputvlanid{OUTPUTVLANID:v};bandwidth{BANDWIDTH:v}'">
+					<sql><![CDATA[
+						SELECT * from COMPANY ORDER BY ID DESC LIMIT 0,1
+					]]></sql>
+				</database>
+				<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+					<set name="context.data" value="event.getParam('eventdata').toString()"/>
+				</wait>
+				<if cond="context.data.toString() != ''">
+					<then>
+						<script><![CDATA[
+							var json = JSON.parse(context.data.toString())
+							context.handledata.setValue(JSON.stringify(json.data))
+						]]></script>
+						<if cond="context.handledata.toString() != 'null'">
+							<then>
+								<script><![CDATA[
+									var zero = JSON.parse(context.data.toString())
+									var json = new Object()
+									json.event = 'getlastspecialline'
+									var specialline = new Object()
+									specialline.id = JSON.parse(zero.data[0]).id
+									specialline.inputPort = JSON.parse(zero.data[0]).inputPort
+									specialline.inputvlanid = JSON.parse(zero.data[0]).inputvlanid
+									specialline.inputtunnel = JSON.parse(zero.data[0]).inputtunnel
+									specialline.inputvxlanport = JSON.parse(zero.data[0]).inputvxlanport
+									specialline.outputPort = JSON.parse(zero.data[0]).outputPort
+									specialline.outputvlanid = JSON.parse(zero.data[0]).outputvlanid
+									specialline.outputtunnel = JSON.parse(zero.data[0]).outputtunnel
+									specialline.outputvxlanport = JSON.parse(zero.data[0]).outputvxlanport
+									specialline.bandwidth = JSON.parse(zero.data[0]).bandwidth
+									specialline.type = JSON.parse(zero.data[0]).type
+									specialline.state = "active"
+									var payload = new Object()
+									payload.specialLine = specialline
+									json.payload = payload
+									var result = JSON.stringify(json)
+									context.detailarray.setValue(result)
+								]]></script>
+								<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+									<jsonsrc src="detailarray"/>
+								</websocket>
+							</then>
+						</if>
+					</then>
+				</if>				
+			</function>
+			<!--
+				@brief		删除一个专线
+				@auth 		YY
+				@date		2017/11/29
+				Input:
+				Output:
+			-->
+			<function name="deleteSpecialLine">				
+				<log level="100">insert deleteSpecialLine</log>
+				<string name="urlvar"/>
+				<string name="path"/>
+				<string name="code"/>
+				<string name="resourceid"/>
+				<string name="result"/>
+				<script><![CDATA[
+					var resourceid = JSON.parse(event.getParam('eventdata').toString()).payload.id
+					context.resourceid.setValue(resourceid)
+					context.path.setValue('http://127.0.0.1:9922/onos/v1/tunnelservice/tunnel/{' + resourceid + '}')
+				]]></script>			
+				<set name="urlvar" value="context.path.toString()"/>
+				<function name="DeleteDataToController">
+					<parameters>						
+						<string name="url" in="context.path.toString()"/>
+						<string name="data" out="context.result"/>
+					</parameters>
+				</function>		
+				<log level="100">insert wait</log>
+				<if cond="context.result.toString() == ''">
+					<then>
+						<exit/>
+					</then>
+				</if>
+				<script><![CDATA[
+					context.code.setValue(JSON.parse(context.result.toString()).result.code)
+				]]></script>
+				<!--if cond="context.code.toString() != '-1'">
+					<then-->
+						<database name="m_db" method="ExecSQL">
+							<sql><![CDATA[
+								DELETE from COMPANY where ID = <%=context.resourceid.toString()%>
+							]]></sql>
+						</database>
+						<wait event="db.response" transportid="context.m_db.ptr.GetTransportId()" timeout="3000">
+							<log level="100"><![CDATA[DELETE table result <%=event.getParam('result').toString()%>]]></log>
+							<log level="100"><![CDATA[DELETE table description <%=event.getParam('description').toString()%>]]></log>
+							<log level="100"><![CDATA[DELETE table transportid <%=event.getParam('transportid').toString()%>]]></log>
+							<log level="100"><![CDATA[DELETE table eventdata <%=event.getParam('eventdata').toString()%>]]></log>
+						</wait>
+					<!--/then>
+				</if-->			
+			</function>
+		</public>
+	</class>
+</starlang>

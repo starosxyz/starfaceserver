@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2017 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	@file 		function_callback.xml
+	@brief 		初始化datapathidMap表
+	@version 	1.1.0
+	@auth 		qiulei
+	@date		2017/08/11
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang>
+	<params name="datapathidMap" global="true"/>
+	<params name="ByChineseNameFindNumberMapObj" global="true"/>
+	<!--
+		@brief		初始化datapathidMap表
+		@auth 		qiulei (qiulei@staros.xyz)
+		@date		2017/12/25
+		Input:
+		Output:
+		198.47.124.183  巴黎SDN交换机  of:128984043274
+		103.198.18.251  香港SDN交换机  of:128984042243
+		128983241826     SDN交换机26
+		128983241924  SDN交换机24
+		128983241836    SDN交换机36
+
+	-->
+	<function name="InitDatapathidMap">
+		<log level="100">开始进入InitDatapathidMap-----------------------------</log>
+		<set name="datapathidMap" paramname="128984043274" value="'巴黎SDN交换机'"/>
+		<set name="datapathidMap" paramname="128984042243" value="'香港SDN交换机'"/>
+		
+		<set name="datapathidMap" paramname="128983241826" value="'SDN交换机26'"/>
+		<set name="datapathidMap" paramname="128983241924" value="'SDN交换机24'"/>
+		<set name="datapathidMap" paramname="128983241836" value="'SDN交换机36'"/>
+		
+		<set name="datapathidMap" paramname="of:111222211" value="'北京'"/>
+		<set name="datapathidMap" paramname="of:111222211" value="'杭州'"/>
+		
+		<set name="datapathidMap" paramname="1" value="'北京-1'"/>
+		<set name="datapathidMap" paramname="2" value="'杭州-2'"/>
+		<set name="datapathidMap" paramname="3" value="'上海-3'"/>
+		<log level="100">InitDatapathidMap方法执行完毕-----------------------------</log>
+	</function>
+	
+	<function name="ByChineseNameFindNumberMap">
+		<log level="100">开始进入InitDatapathidMap-----------------------------</log>
+		<set name="ByChineseNameFindNumberMapObj" paramname="巴黎SDN交换机" value="'128984043274'"/>
+		<set name="ByChineseNameFindNumberMapObj" paramname="香港SDN交换机" value="'128984042243'"/>
+		
+		<set name="ByChineseNameFindNumberMapObj" paramname="北京-1" value="'1'"/>
+		<set name="ByChineseNameFindNumberMapObj" paramname="杭州-2" value="'2'"/>
+		<set name="ByChineseNameFindNumberMapObj" paramname="上海-3" value="'3'"/>
+		
+		<set name="ByChineseNameFindNumberMapObj" paramname="SDN交换机26" value="'128983241826'"/>
+		<set name="ByChineseNameFindNumberMapObj" paramname="SDN交换机24" value="'128983241924'"/>
+		<set name="ByChineseNameFindNumberMapObj" paramname="SDN交换机36" value="'128983241836'"/>
+		<log level="100">InitDatapathidMap方法执行完毕-----------------------------</log>
+	</function>
+	<function name="getAllDeviceMap">
+		<string name="detailarray"/>
+		<string name="data" value="context.datapathidMap.toJson()"/>
+		<script><![CDATA[
+			var info = context.data.toString()
+			var root = new Object()
+			root.event = 'getAllDeviceMapResponse'
+			var payload = new Object()			
+			payload.deviceMap = info
+			root.payload = payload
+			var strjson = JSON.stringify(root)
+			context.detailarray.setValue(strjson)
+		]]></script>
+		<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+			<jsonsrc src="detailarray"/>
+		</websocket>
+	</function>
+	<function name="handleDeviceMap">
+		<string name="detailarray"/>
+		<string name="deviceid" value="'false'"/>
+		<string name="cn_deviceid" value="'false'"/>
+		<script><![CDATA[
+			var root = JSON.parse(event.getParam('eventdata').toString()).payload
+			if (root.id == "" || root.id == null) {
+				if (root.cn_deviceid == "" || root.cn_deviceid == null) {
+					return
+				} else {
+					context.deviceid.setValue(root.deviceid)
+					context.cn_deviceid.setValue(root.cn_deviceid)
+				}				
+			} else {
+				context.datapathidMap.deleteParam(root.deviceid)
+			}
+		]]></script>
+		<if cond="context.deviceid.toString() != 'false' &amp;&amp; context.cn_deviceid.toString() != 'false'">
+			<then>
+				<set name="datapathidMap" paramname="context.deviceid.toString()" value="context.cn_deviceid.toString()"/>
+			</then>
+		</if>
+	</function>
+</starlang>

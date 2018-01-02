@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		starfaceserver.xml
+	@brief 		CTopoManager管理
+	@version 	1.1.0
+	@auth 		YY
+	@date		2017/11/02
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<class name="CTopoManager">
+		<public>
+			<function name="CTopoManager">
+				<log>CTopoManage is created</log>
+			</function>
+			<function name="updatePrefReq">
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonbody>
+					<![CDATA[
+						{
+						    "event": "updatePrefs",
+						    "payload": {
+						        "topo_prefs": {
+						            "insts": 1,
+						            "summary": 1,
+						            "detail": 1,
+						            "hosts": 0,
+						            "offdev": 1,
+						            "dlbls": 0,
+						            "porthl": 1,
+						            "bg": 0,
+						            "spr": 0,
+						            "ovid": "traffic",
+						            "toolbar": 0
+						        },
+						        "topo_mapid": {
+						            "mapid": "usa",
+						            "mapscale": 1,
+						            "mapfilepath": "*continental_us",
+						            "tint": "off"
+						        },
+						        "topo_zoom": {
+						            "tx": 0,
+						            "ty": 0,
+						            "sc": 1
+						        }
+						    }
+						}
+					]]>
+					</jsonbody>
+				</websocket>
+			</function>
+
+			<function name="requestSummary">
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonbody>
+					<![CDATA[
+							{
+							    "event": "showSummary",
+							    "payload": {
+							        "title": "设备总体信息",
+							        "type": "node",
+							        "id": null,
+							        "propOrder": [
+							            "版本",
+							            "-",
+							            "设备个数",
+							            "连接个数",
+							            "主机个数",
+							            "Topo个数",
+							            "-",
+							            "目的个数",
+							            "隧道个数",
+							            "流表个数"
+							        ],
+							        "props": {
+							            "版本": "1.10.0",
+							            "-": "",
+							            "设备个数": "0",
+							            "连接个数": "0",
+							            "主机个数": "0",
+							            "Topo个数": "1",
+							            "目的个数": "0",
+							            "隧道个数": "0",
+							            "流表个数": "12"
+							        },
+							        "buttons": []
+							    }
+							}
+						]]>
+					</jsonbody>
+				</websocket>
+			</function>
+
+			<function name="topoStart">				
+				<function name="SendAddInstance"/>
+				<function name="SendAddAllSwitch"/>
+				<function name="SendAddAllIEDS"/>
+				<!--function name="SendAddAllHost"/-->
+				<function name="SendAddAllLink"/>
+
+				<function name="topoStartDone"/>
+			</function>
+
+			<function name="SendAddInstance">
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonbody>
+					<![CDATA[
+							{
+								"event":"addInstance",
+								"payload":
+									{
+										"id":"127.0.0.1",
+										"ip":"127.0.0.1",
+										"online":true,
+										"ready":true,
+										"uiAttached":true,
+										"switches":1,
+										"labels":[
+											"true",
+											"true"
+										]
+									}
+							}
+						]]>
+					</jsonbody>
+				</websocket>				
+			</function>
+
+			<function name="SendAddAllSwitch">
+				<function name="allSwitch2Json" class="switchManager">
+					<parameters>
+						<string name="transportid" in="event.getParam('transportid').toString()"/>
+					</parameters>
+				</function>
+			</function>
+
+			<function name="SendAddAllLink">
+				<function name="allLink2Json" class="LinkManager">
+					<parameters>
+						<string name="transportid" in="event.getParam('transportid').toString()"/>
+					</parameters>
+				</function>
+			</function>
+            
+            <function name="SendAddAllIEDS">
+				<function name="allIEDS2Json" class="IEDSManager">
+					<parameters>
+						<string name="transportid" in="event.getParam('transportid').toString()"/>
+					</parameters>
+				</function>
+			</function>
+			
+			<function name="topoStartDone">
+				<string name="sendstrjson"/>
+				<function>
+					<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+						<jsonbody>
+						<![CDATA[
+							{"event":"topoStartDone","payload":{}}
+							]]>
+						</jsonbody>
+					</websocket>
+				</function>
+			</function>
+
+			<function name="requestDetails">
+				<string name="datapathid"/>
+				<script><![CDATA[
+					var info = JSON.parse(event.getParam("eventdata").toString());
+					var dataid = info.payload.id;
+					var final_id = dataid.split(":")[1];
+					context.datapathid.setValue(final_id);
+					]]>
+				</script>
+				
+				<log level="10">
+					<![CDATA[178 CTopoManager datapathid :<%=context.datapathid.toString()%>]]>
+				</log>
+				
+				<log level="10">
+					<![CDATA[182 CTopoManager transportid :<%=event.getParam('transportid').toString()%>]]>
+				</log>
+				
+				<string name="flag"/>
+				<function name="SendDetails" class="switchManager">
+					<parameters>
+						<string name="transportid" in="event.getParam('transportid').toString()"/>
+						<string name="datapathid" in="context.datapathid.toString()"/>
+						<string name="isExists" out="context.flag"/>
+					</parameters>
+				</function>
+				
+				<if cond="context.flag.toString()=='false'">
+					<then>
+						<function name="SendDetails" class="IEDSManager">
+							<parameters>
+								<string name="transportid" in="event.getParam('transportid').toString()"/>
+								<string name="datapathid" in="context.datapathid.toString()"/>
+							</parameters>
+						</function>
+					</then>
+				</if>
+				
+			</function>
+		</public>
+	</class>
+</starlang>

@@ -35,6 +35,8 @@ all: check_dir $(buidlall)
 	cp -rf $(USER_ROOT)/AUTHORS $(PRJDIR)/$(PROJECT_NAME)/
 	cp -rf $(USER_ROOT)/resources $(PRJDIR)/$(PROJECT_NAME)/
 	cp -rf $(USER_ROOT)/docs/* $(PRJDIR)/$(PROJECT_NAME)/docs
+	cp -rf $(USER_ROOT)/src/starlang/* $(PRJDIR)/$(PROJECT_NAME)/starlang/
+	cp -rf $(USER_ROOT)/src/sdnwan/* $(PRJDIR)/$(PROJECT_NAME)/sdnwan/
 	cp -rf $(USER_ROOT)/include/myversion.h $(PRJDIR)/$(PROJECT_NAME)/include/
 	cp -rf $(USER_ROOT)/tools/*.pem $(PRJDIR)/$(PROJECT_NAME)/system/
 	echo "Packing " $(TARNAME) "..."
@@ -63,6 +65,8 @@ check_dir:
 	@test -d $(PRJDIR)/$(PROJECT_NAME)/changelogs || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/changelogs
 	@test -d $(PRJDIR)/$(PROJECT_NAME)/docs || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/docs
 	@test -d $(PRJDIR)/$(PROJECT_NAME)/html || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/html
+	@test -d $(PRJDIR)/$(PROJECT_NAME)/starlang || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/starlang
+		@test -d $(PRJDIR)/$(PROJECT_NAME)/sdnwan || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/sdnwan
 	@test -d $(PRJDIR)/$(PROJECT_NAME)/html/starface || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/html/starface
 	@test -d $(PRJDIR)/$(PROJECT_NAME)/html/starface/ui || mkdir -p $(PRJDIR)/$(PROJECT_NAME)/html/starface/ui
 #################################################################################

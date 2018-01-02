@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		starfaceserver.xml
+	@brief 		CIEDS管理
+	@version 	1.1.0
+	@auth 		YXR
+	@date		2017/11/01
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<class name="CIEDS">
+		<private>
+			<string name="m_no"/>
+			<string name="m_device" />
+			<string name="m_mac" />
+			<string name="m_aport" />
+			<string name="m_bport" />
+			<string name="m_cport" />
+			<string name="m_dport" />
+		</private>
+		<public>
+			<function name="CIEDS">
+				<parameters>
+              		<string name="no"/>
+					<string name="device"/>
+					<string name="mac"/>
+					<string name="aport"/>
+					<string name="bport"/>
+					<string name="cport"/>
+					<string name="dport"/>
+				</parameters>
+				<set name="thisclass.m_no" value="context.no.toString()"/>
+				<set name="thisclass.m_device" value="context.device.toString()"/>
+				<set name="thisclass.m_mac" value="context.mac.toString()"/>
+				<set name="thisclass.m_aport" value="context.aport.toString()"/>
+				<set name="thisclass.m_bport" value="context.bport.toString()"/>
+				<set name="thisclass.m_cport" value="context.cport.toString()"/>
+				<set name="thisclass.m_dport" value="context.dport.toString()"/>
+			</function>
+			<!--qiulei 20171107pm-->
+			<function name="SendDetails">
+				<parameters>
+					<string name="transportid" />
+				</parameters>
+				<string name="detailarray" />
+				<script><![CDATA[
+					var oneArray = new Array();
+						oneArray.push("编号");
+						oneArray.push("设备");
+						oneArray.push("MAC地址");
+						
+						oneArray.push("-");
+						oneArray.push("Latitude");
+						oneArray.push("Longitude");
+						oneArray.push("-");
+						
+						oneArray.push("A端口");
+						oneArray.push("B端口");
+						oneArray.push("C端口");
+						oneArray.push("D端口");
+					var twoarray = new Object();
+						twoarray['编号'] ="of:" + thisclass.m_no.toString();
+						twoarray['设备'] =thisclass.m_device.toString();
+						twoarray['MAC地址'] = thisclass.m_mac.toString();
+						
+						twoarray['-'] = "";
+						twoarray['Latitude'] = null;
+						twoarray['Longitude'] = null;
+						
+						twoarray['A端口'] = thisclass.m_aport.toString();
+						twoarray['B端口'] = thisclass.m_bport.toString();
+						twoarray['C端口'] = thisclass.m_cport.toString();
+						twoarray['D端口'] = thisclass.m_dport.toString();
+					var threeArray = new Array();
+						threeArray.push("showDeviceView");
+						threeArray.push("showFlowView");
+						threeArray.push("showPortView");
+						threeArray.push("showGroupView");
+						threeArray.push("showMeterView");
+						threeArray.push("showDeviceFlows");
+						threeArray.push("showRelatedTraffic");
+						
+					var payload = new Object();
+						payload['title'] = "of:" + thisclass.m_device.toString();
+						payload['type'] = "IEDS";
+						payload['id'] = "of:" + thisclass.m_device.toString();
+						payload['propOrder'] = oneArray;
+						payload['props'] = twoarray;
+						payload['buttons'] = threeArray;
+
+					var json = new Object();
+						json['event'] = "showDetails";
+						json['payload'] = payload;
+						
+					var strjson=JSON.stringify(json);
+					context.detailarray.setValue(strjson);
+					
+				]]></script>
+				<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+					<jsonsrc src="detailarray"/>
+				</websocket>
+			</function>
+			
+			
+			<!--qiulei 20171103pm-->
+			<function name="update">
+				<parameters>
+              		<string name="no"/>
+					<string name="device"/>
+					<string name="mac"/>
+					<string name="aport"/>
+					<string name="bport"/>
+					<string name="cport"/>
+					<string name="dport"/>
+				</parameters>
+				<set name="thisclass.m_no" value="context.no.toString()"/>
+				<set name="thisclass.m_device" value="context.device.toString()"/>
+				<set name="thisclass.m_mac" value="context.mac.toString()"/>
+				<set name="thisclass.m_aport" value="context.aport.toString()"/>
+				<set name="thisclass.m_bport" value="context.bport.toString()"/>
+				<set name="thisclass.m_cport" value="context.cport.toString()"/>
+				<set name="thisclass.m_dport" value="context.dport.toString()"/>
+			</function>
+			
+			<!--qiulei 20171103pm-->
+			<function name="printIeds">
+					<log level="10"><![CDATA[CIEDS printCIEDS no = <%=thisclass.m_no.toString()%>]]></log>
+					<log level="10"><![CDATA[CIEDS printCIEDS device = <%=thisclass.m_device.toString()%>]]></log>
+					<log level="10"><![CDATA[CIEDS printCIEDS mac = <%=thisclass.m_mac.toString()%>]]></log>
+					<log level="10"><![CDATA[CIEDS printCIEDS aport = <%=thisclass.m_aport.toString()%>]]></log>
+					<log level="10"><![CDATA[CIEDS printCIEDS bport = <%=thisclass.m_bport.toString()%>]]></log>
+					<log level="10"><![CDATA[CIEDS printCIEDS cport = <%=thisclass.m_cport.toString()%>]]></log>
+					<log level="10"><![CDATA[CIEDS printCIEDS dport = <%=thisclass.m_dport.toString()%>]]></log>
+					<log level="10">---------------------------------------------------------------------------------------</log>
+			</function>
+			
+			<function name="IEDS2Json">
+				<parameters>
+					<string name="IEDSObject2Json"/>
+				</parameters>
+				<string name="values"/>
+				<double name="x"/>
+				<double name="y"/>
+				<script><![CDATA[
+					var fax = Math.random() >= 0.5 ? Math.random()*1101 : Math.random()*-601;	
+					context.x.setValue(fax);
+					var y=Math.random()*201+100;
+					context.y.setValue(y);
+					
+					]]>
+				</script>
+				<reference variable="values">
+					<jsonbody><![CDATA[ 
+						{
+							"event":"addDevice",
+							"payload":
+							{
+								"id":"of:<%=thisclass.m_device.toString()%>",
+								"type":"switch",
+								"online":true,
+								"master":"<%=thisclass.m_device.toString()%>",
+								"labels":
+									[
+									"","of:<%=thisclass.m_device.toString()%>",
+									"of:<%=thisclass.m_device.toString()%>"
+									],
+								"props":
+									{
+										"managementAddress":"<%=thisclass.m_device.toString()%>",
+										"protocol":"OF_13",
+										"channelId":"<%=thisclass.m_device.toString()%>"
+									},
+								"metaUi":
+								{
+									"x":<%=context.x.toDouble()%>,
+									"y":<%=context.y.toDouble()%>,
+								
+									"equivLoc":
+										{
+										"lng":-98.18860657853635,
+										"lat":43.492555430485986
+										}
+								}
+							}
+						}
+					]]></jsonbody>
+				</reference>
+				<set name="IEDSObject2Json" value="context.values.toString()"/>
+			</function>
+
+			<function name="GetDataToString">
+				<parameters>
+					<string name="strieds"/>
+				</parameters>
+				<string name="values"/>
+				<reference variable="values">
+					<jsonbody><![CDATA[ 
+							{
+								"No":"<%=thisclass.m_no.toString()%>",
+								"IED":"<%=thisclass.m_device.toString()%>",
+								"MAC":"<%=thisclass.m_mac.toString()%>",
+								"A":"<%=thisclass.m_aport.toString()%>",
+								"B":"<%=thisclass.m_bport.toString()%>",
+								"C":"<%=thisclass.m_cport.toString()%>",
+								"D":"<%=thisclass.m_dport.toString()%>"
+							}
+					]]></jsonbody>
+				</reference>
+				<set name="strieds" value="context.values.toString()"/>
+			</function>
+		</public>
+	</class>
+	<class name="CIEDSManager">
+		<private>
+			<hashmap name="IEDSManager" keytype="string" valuetype="object"/>
+		</private>
+		<public>
+			<function name="CIEDSManager">
+				<log>CIEDSManager is Create</log>
+			</function>
+			
+			<!--qiulei 20171108 am-->
+			<function name="getIEDSManagerContainer">
+				<parameters>
+					<hashmap name="IEDSManagerContainer" keytype="string" valuetype="object"/>
+				</parameters>
+				<set name="IEDSManagerContainer" value="thisclass.IEDSManager"/>
+			</function>
+			
+			<!--qiulei 20171104 pm-->
+			<function name="GetOneIedsObjectByKeyIED">
+				<parameters>
+					<string name="KeyIED"/>
+					<object name="iedsObj"/>
+				</parameters>
+				<if cond="context.IEDSManager.hasValue(context.KeyIED.toString())==true">
+					<then>
+						<function>
+							<lookup name="IEDSManager" key="context.KeyIED.toString()" output="context.iedsObj"/>
+						</function>
+					</then>
+				</if>
+			</function>
+			<!--qiulei 20171104 pm 得到1个Ieds的JSON字符串-->
+			<function name="GetOneIedsJsonByKeyIED">
+				<parameters>
+					<string name="KeyIED"/>
+					<string name="oneIedsJson"/>
+				</parameters>
+				<object name="iedsObj"/>
+				<if cond="context.IEDSManager.hasValue(context.KeyIED.toString())==true">
+					<then>
+						<function>
+							<lookup name="IEDSManager" key="context.device.toString()" output="context.iedsObj"/>
+						</function>
+					</then>
+				</if>
+				
+				<if cond="context.iedsObj.ptr != null">
+					<then>
+						<function name="GetDataToString" class="context.iedsObj">
+							<parameters>
+								<string name="strieds" out="oneIedsJson"/>
+							</parameters>
+						</function>
+					</then>
+				</if>
+			</function>
+			<!--qiulei 20171102 am 打印容器中元素的个数-->
+			<function name="GetIedsCounts">
+				<parameters>
+					<string name="iedsCounts"/>
+				</parameters>
+				<set name="iedsCounts" value="context.IEDSManager.size()"/>	
+			</function>
+			
+			<!--qiulei 20171103pm-->
+			<function name="UpdateIedsToIEDSManager">
+				<object name="iedsObj"/>
+				<string name="no"/>
+				<string name="device"/>
+				<string name="mac"/>
+				<string name="aport"/>
+				<string name="bport"/>
+				<string name="cport"/>
+				<string name="dport"/>
+				
+				<script><![CDATA[
+					var JsonInfoObj = JSON.parse(event.getParam("eventdata").toString());
+					var iedsJsonObj=JsonInfoObj.payload;
+					
+					context.no.setValue(iedsJsonObj.No);
+					context.device.setValue(iedsJsonObj.IED);
+					context.mac.setValue(iedsJsonObj.MAC);
+					context.aport.setValue(iedsJsonObj.A);
+					context.bport.setValue(iedsJsonObj.B);
+					context.cport.setValue(iedsJsonObj.C);
+					context.dport.setValue(iedsJsonObj.D);
+				]]></script>
+				<log><![CDATA[178 UpdateIedsToIEDSManager no = <%=context.no.toString()%>]]></log>
+				<log><![CDATA[178 UpdateIedsToIEDSManager device = <%=context.device.toString()%>]]></log>
+				<log><![CDATA[178 UpdateIedsToIEDSManager mac = <%=context.mac.toString()%>]]></log>
+				<log><![CDATA[178 UpdateIedsToIEDSManager aport = <%=context.aport.toString()%>]]></log>
+				<log><![CDATA[178 UpdateIedsToIEDSManager bport = <%=context.bport.toString()%>]]></log>
+				<log><![CDATA[178 UpdateIedsToIEDSManager cport = <%=context.cport.toString()%>]]></log>
+				<log><![CDATA[178 UpdateIedsToIEDSManager dport = <%=context.dport.toString()%>]]></log>
+				
+				<if cond="context.IEDSManager.hasValue(context.device.toString())==true">
+					<then>
+						<log>188device不为空</log>
+						<function>
+							<lookup name="IEDSManager" key="context.device.toString()" output="context.iedsObj"/>
+							<remove name="IEDSManager" key="context.device.toString()"/>
+						</function>
+					</then>
+				</if>
+
+				<function name="update" class="iedsObj" >
+					<parameters>
+						<string name="no" in="context.no.toString()" />
+						<string name="device" in="context.device.toString()" />
+						<string name="mac" in= "context.mac.toString()" />
+						<string name="aport" in= "context.aport.toString()" />
+						<string name="bport" in= "context.bport.toString()" />
+						<string name="cport" in="context.cport.toString()" />
+						<string name="dport" in= "context.dport.toString()" />
+					</parameters>
+				</function>
+				<function name="printIeds" class="iedsObj"/>
+				<insert name="thisclass.IEDSManager" key="context.device.toString()" value="context.iedsObj"/>
+				<log leve="10"><![CDATA[203更新后元素个数:=<%=context.IEDSManager.size().toString()%>]]></log>
+				<!--
+					<function name="UpdateIedsFile"/>
+				-->
+			</function>
+			
+			
+			
+			<!--qiulei 20171103pm-->
+			<function name="AddIedsToIEDSManager">
+				<object name="iedsObj"/>
+				
+				<string name="no"/>
+				<string name="device"/>
+				<string name="mac"/>
+				<string name="aport"/>
+				<string name="bport"/>
+				<string name="cport"/>
+				<string name="dport"/>
+				
+				<script><![CDATA[
+					var JsonInfoObj = JSON.parse(event.getParam("eventdata").toString());
+					var iedsJsonObj=JsonInfoObj.payload;
+					
+					context.no.setValue(iedsJsonObj.No);
+					context.device.setValue(iedsJsonObj.IED);
+					context.mac.setValue(iedsJsonObj.MAC);
+					context.aport.setValue(iedsJsonObj.A);
+					context.bport.setValue(iedsJsonObj.B);
+					context.cport.setValue(iedsJsonObj.C);
+					context.dport.setValue(iedsJsonObj.D);
+				]]></script>
+				
+				<new name="iedsObj" class="CIEDS" >
+					<parameters>
+						<string name="no" in="context.no.toString()" />
+						<string name="device" in="context.device.toString()" />
+						<string name="mac" in= "context.mac.toString()" />
+						<string name="aport" in= "context.aport.toString()" />
+						<string name="bport" in= "context.bport.toString()" />
+						<string name="cport" in="context.cport.toString()" />
+						<string name="dport" in= "context.dport.toString()" />
+					</parameters>
+				</new>
+				<function name="printIeds" class="iedsObj"/>
+				<insert name="thisclass.IEDSManager" key="context.device.toString()" value="context.iedsObj"/>
+				<log leve="10"><![CDATA[247添加后元素个数:=<%=context.IEDSManager.size().toString()%>]]></log>
+				<!--更新文件-->
+				<!--
+					<function name="UpdateIedsFile"/>
+				-->
+			</function>
+			
+			<!--qiulei 20171103pm-->
+			<function name="DeleteObjectFromIEDSManager">
+				<string name="keyIED"/>
+				
+				<script><![CDATA[
+				var info = JSON.parse(event.getParam("eventdata").toString());
+				context.keyIED.setValue(info.payload.IED);
+				]]></script>
+				<remove name="IEDSManager" key="context.keyIED.toString()"/>
+				<log leve="10"><![CDATA[276删除后元素个数:=<%=context.IEDSManager.size().toString()%>]]></log>
+				<!--更新文件-->
+				<!--
+					<function name="UpdateIedsFile"/>
+				-->
+			</function>
+			
+			
+			<function name="InitIEDS">
+				<string name="no"/>
+				<string name="device" />		
+				<string name="mac" />	
+				<string name="aport" />
+				<string name="bport" />	
+				<string name="cport" />		
+				<string name="dport" />	
+				<long name="length" />
+				<messageblock name="filecontentss"/>
+				<string name="activitefile"/>
+				<object name="IEDSOBJ"/>
+				<long name="i" />
+				
+				<!--set name="activitefile" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/ieds.json'"/-->
+				<file method="readfile" name="'/opt/staros.xyz/starfaceserver/starlang/topo/json/ieds.json'" data="context.filecontentss"/>
+				<log level="10"><![CDATA[filecontentss= <%=context.filecontentss.toString()%>]]></log>
+
+				<script><![CDATA[
+					var iedslist = JSON.parse(context.filecontentss.toString())
+					context.length.setValue(iedslist.ieds.length)
+				]]></script>
+				<log level="10"><![CDATA[length= <%=context.length.toString()%>]]></log>
+				<for var="i" from="0" to="context.length.toLong()">
+					<script><![CDATA[
+						var ideslist = JSON.parse(context.filecontentss.toString())
+						var arr_ieds = ideslist.ieds
+						context.no.setValue(arr_ieds[context.i.toLong()].No)
+						context.device.setValue(arr_ieds[context.i.toLong()].IED)
+						context.mac.setValue(arr_ieds[context.i.toLong()].MAC)
+						context.aport.setValue(arr_ieds[context.i.toLong()].A)
+						context.bport.setValue(arr_ieds[context.i.toLong()].B)
+						context.cport.setValue(arr_ieds[context.i.toLong()].C)
+						context.dport.setValue(arr_ieds[context.i.toLong()].D)
+					]]></script>
+					
+					<new name="IEDSOBJ" class="CIEDS" >
+						<parameters>
+							<string name="no" in="context.no.toString()" />
+							<string name="device" in="context.device.toString()" />
+							<string name="mac" in= "context.mac.toString()" />
+							<string name="aport" in= "context.aport.toString()" />
+							<string name="bport" in= "context.bport.toString()" />
+							<string name="cport" in="context.cport.toString()" />
+							<string name="dport" in= "context.dport.toString()" />
+						</parameters>
+					</new>
+					<insert name="thisclass.IEDSManager" key="context.device.toString()" value="context.IEDSOBJ"/>
+					
+				</for>
+			</function>
+			
+			<function name="allIEDS2Json">
+				<parameters>
+					<string name="transportid"/>
+				</parameters>
+				<object name="oneieds"/>
+				<string name="oneiedsstr"/>
+				<pair name="oneiedspair" keytype="string" valuetype="object"/>			
+				<log level="10"><![CDATA[329 !!!IEDS count!!!!!!!!!!!!!!!!= <%=context.IEDSManager.size().toString()%>]]></log>
+				
+				<for var="oneiedspair" in="thisclass.IEDSManager">
+					<set name="oneieds" value="context.oneiedspair.second()"/>
+					<if cond="context.oneieds.ptr!=null">
+						<then>
+							<function name="IEDS2Json" class="context.oneieds">
+								<parameters>
+									<string name="IEDSObject2Json" out="context.oneiedsstr"/>
+								</parameters>
+							</function>
+							<websocket name="restfulserver" method="SendText" transportid="context.transportid.toString()">
+								<jsonsrc src="oneiedsstr"/>
+							</websocket>
+						</then>
+					</if>
+				</for> 
+			</function>		
+			
+
+			<!--YXR-->
+			<function name="SendAllIEDSToWebClient">
+				<string name="jsondata"/>
+				<string name="sendjsonstr"/>
+            	<object name="oneieds"/>
+				<pair name="oneiedspair" keytype="string" valuetype="object"/>
+				<long name="i"/>			
+				<list name="alliedslist" valuetype="string"/>
+				<string name="stringieds"/>
+				<for var="oneiedspair" in="thisclass.IEDSManager">
+					<set name="oneieds" value="context.oneiedspair.second()"/>
+					<if cond="context.oneieds.ptr!=null">
+						<then>
+							<function name="GetDataToString" class="context.oneieds">
+								<parameters>
+									<string name="strieds" out="context.stringieds"/>
+								</parameters>
+							</function>
+							<insert name="alliedslist" value="context.stringieds"/>
+						</then>
+					</if>
+				</for> 
+
+
+				<script><![CDATA[
+					var json = new Object();
+					var myArray=new Array();  
+					
+					var firstString=context.alliedslist.getFirst();
+					while(firstString!=null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString=context.alliedslist.getNext();
+					}
+					
+					json['event']='iedsDataResponse';
+					
+					var payload = new Object();
+					payload['ieds']=myArray;
+
+					json['payload']=payload;
+					var strjson=JSON.stringify(json);
+					context.sendjsonstr.setValue(strjson);
+				]]></script>
+				<websocket name="restfulserver" method="SendText" transportid="event.getParam('transportid').toString()">
+					<jsonsrc src="context.sendjsonstr"/>
+				</websocket>
+			</function>
+			
+			<!--qiulei 20171103pm-->
+			<function name="UpdateIedsFile">
+				<string name="filepath" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/ieds.json'"/>
+				<pair name="oneIedsPair" keytype="string" valuetype="object"/>
+				<object name="oneIedsObj"/>
+				<string name="IedsJsonStr"/>
+				<string name="sendjsonstr"/>
+				<list name="allIedsJsonStrlist" valuetype="string"/>
+				<for var="oneIedsPair" in="thisclass.IEDSManager">
+					<function>
+						<set name="oneIedsObj" value="context.oneIedsPair.second()"/>
+						<if cond="context.oneIedsObj.ptr != null">
+							<then>
+								<function name="GetDataToString" class="context.oneIedsObj">
+									<parameters>
+										<string name="strieds" out="IedsJsonStr"/>
+									</parameters>
+								</function>
+
+								<insert name="allIedsJsonStrlist" value="context.IedsJsonStr.toString()"/>
+							</then>
+						</if>
+						
+					</function>
+				</for>
+				<script><![CDATA[
+					
+					var myArray=new Array(); 
+					var firstString=context.allIedsJsonStrlist.getFirst();
+					while(firstString!=null){
+						var onearray = JSON.parse(firstString);
+						myArray.push(onearray);
+						firstString=context.allIedsJsonStrlist.getNext();
+					}
+					
+					var json = new Object();
+					json['ieds']=myArray;
+					
+					var strjson=JSON.stringify(json);
+					context.sendjsonstr.setValue(strjson);
+					
+				]]></script>
+				<!--file method="writefile" name="context.filepath.toString()" data="context.sendjsonstr.toMessageBlock()"/-->
+			</function>
+			
+			<!--qiulei 20171108-->
+			<function name="SendDetails">	
+				<parameters>
+					<string name="transportid"/>
+					<string name="datapathid"/>	
+				</parameters>
+				
+				<object name="iedsObj"/>
+				<function name="GetOneIedsObjectByKeyIED">
+					<parameters>
+						<string name="KeyIED" in="context.datapathid.toString()"/>
+						<object name="iedsObj" out="context.iedsObj"/>
+					</parameters>
+				</function>
+
+				<if cond="context.iedsObj.ptr!=null">
+					<then>
+						<function name="SendDetails" class="context.iedsObj">
+							<parameters>
+								<string name="transportid" in="context.transportid.toString()"/>
+							</parameters>
+						</function>
+					</then>
+				</if>
+			</function>
+		</public>
+	</class>
+</starlang>

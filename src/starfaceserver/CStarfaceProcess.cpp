@@ -86,6 +86,7 @@ void CStarfaceProcess::OnProcessRun(int argc, char** argv, IDIPCProcess *dipcPro
     
     getPortFromList(m_strcontrolerport);
     m_server.SetControllerInfo(m_strcontrolerip,m_strcontrolerport,m_controllerusername,m_controllerpassword);
+    
 
 
     CAWResult rv = IStarGui::Instance().Register(category,
@@ -197,7 +198,7 @@ bool CStarfaceProcess::IsCertValite(const std::string& m_cerfile)
     if (memcmp(strheader2.c_str(), m_cerfile.c_str(), strlen(strheader2.c_str()))==0)
     {
         return true;
-}
+    }
 
     return true;
 }

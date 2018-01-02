@@ -1,2 +1,0 @@
-# starfaceserver
-StarOS controller Orchestration

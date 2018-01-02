@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		CNetworkManager.xml
+	@brief 		CNetwork管理
+	@version 	1.1.0
+	@auth 		YY
+	@date		2017/11/01
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+<!--
+	Author:
+			YY
+	Date:
+			2017-11-01
+	Copyright: 
+			Nanjing StarOS Inc. All rights reserved.
+-->
+	<class name="CNetwork">
+		<private>
+			<string name="m_srcdevice"/>
+			<string name="m_dstdevice"/>
+			<string name="m_srcmac"/>
+			<string name="m_dstmac"/>
+			<string name="m_type"/>
+		</private>
+		<public>
+			<function name="CNetwork">
+				<parameters>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcmac"/>
+					<string name="dstmac"/>
+					<string name="type"/>
+				</parameters>
+				<set name="thisclass.m_srcdevice" value="context.srcdevice.toString()"/>
+				<set name="thisclass.m_dstdevice" value="context.dstdevice.toString()"/>
+				<set name="thisclass.m_srcmac" value="context.srcmac.toString()"/>
+				<set name="thisclass.m_dstmac" value="context.dstmac.toString()"/>
+				<set name="thisclass.m_type" value="context.type.toString()"/>				
+			</function>
+			<function name="printNetworkdata">
+				<log><![CDATA[CNetwork printNetworkdata srcdevice = <%=thisclass.m_srcdevice.toString()%>]]></log>
+				<log><![CDATA[CNetwork printNetworkdata dstdevice = <%=thisclass.m_dstdevice.toString()%>]]></log>
+				<log><![CDATA[CNetwork printNetworkdata srcmac = <%=thisclass.m_srcmac.toString()%>]]></log>
+				<log><![CDATA[CNetwork printNetworkdata dstmac = <%=thisclass.m_dstmac.toString()%>]]></log>
+				<log><![CDATA[CNetwork printNetworkdata type = <%=thisclass.m_type.toString()%>]]></log>
+			</function>
+		</public>
+	</class>
+	<class name="CNetworkManager">
+		<private>
+			<hashmap name="networkContainer" keytype="string" valuetype="object"/>
+		</private>
+		<public>
+			<function name="CNetworkManager">
+				<log>CNetworkManager start</log>
+				<function name="initNetworks"/>
+			</function>
+			<function name="initNetworks">
+				<string name="filepath" value="'/opt/staros.xyz/starfaceserver/starlang/topo/json/network.json'"/>
+				<messageblock name="networkdata"/>
+				<file method="readfile" name="context.filepath.toString()" data="context.networkdata"/>
+				<long name="list_length"/>
+				<string name="id"/>
+				<string name="srcdevice"/>
+				<string name="dstdevice"/>
+				<string name="srcmac"/>
+				<string name="dstmac"/>
+				<string name="type"/>
+				<object name="networkobj"/>
+				<long name="i"/>
+				<script><![CDATA[
+					var networklist = JSON.parse(context.networkdata.toString())
+					context.list_length.setValue(networklist.networks.length)
+				]]></script>
+				<for var="i" from="0" to="context.list_length.toLong()">
+					<script><![CDATA[
+						var networklist = JSON.parse(context.networkdata.toString())
+						var arr_network = networklist.networks
+						context.id.setValue(arr_network[context.i.toLong()].No)
+						context.srcdevice.setValue(arr_network[context.i.toLong()].srcdevice)
+						context.dstdevice.setValue(arr_network[context.i.toLong()].dstdevice)
+						context.srcmac.setValue(arr_network[context.i.toLong()].srcmac)
+						context.dstmac.setValue(arr_network[context.i.toLong()].dstmac)
+						context.type.setValue(arr_network[context.i.toLong()].protocol)
+					]]></script>
+					<new name="networkobj" class="CNetwork">
+						<parameters>
+							<string name="srcdevice" in="context.srcdevice.toString()"/>
+							<string name="dstdevice" in="context.dstdevice.toString()"/>
+							<string name="srcmac" in="context.srcmac.toString()"/>
+							<string name="dstmac" in="context.dstmac.toString()"/>
+							<string name="type" in="context.type.toString()"/>
+						</parameters>
+					</new>
+					<function name="printNetworkdata" class="networkobj"/>
+					<insert name="thisclass.networkContainer" key="context.id.toString()" value="context.networkobj"/>
+				</for>
+			</function>
+			<function name="getNetworkNum">
+				<parameters>
+					<long name="number"/>
+				</parameters>
+				<set name="context.number" value="thisclass.networkContainer.size()"/>
+			</function>
+			<function name="getNetwork">
+				<parameters>
+					<string name="id"/>
+					<object name="network"/>
+				</parameters>
+				<if cond="thisclass.networkContainer.hasValue(context.id.toString())">
+					<then>
+						<set name="context.network" value="thisclass.networkContainer.getValue(context.id.toString()"/>
+					</then>
+				</if>
+			</function>
+		</public>
+	</class>
+</starlang>

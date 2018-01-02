@@ -51,55 +51,52 @@
 					<script>
 						<![CDATA[
 						function trim(s){
-						return trimRight(trimLeft(s));
+							return trimRight(trimLeft(s));
 						}
 						function trimLeft(s){
-						if(s == null) {
-						return "";
-						}
-						var whitespace = new String(" \t\n\r");
-						var str = new String(s);
-						if (whitespace.indexOf(str.charAt(0)) != -1) {
-						var j=0, i = str.length;
-						while (j < i && whitespace.indexOf(str.charAt(j)) != -1){
-						j++;
-						}
-						str = str.substring(j, i);
-						}
-						return str;
+							if(s == null) {
+								return "";
+							}
+							var whitespace = new String(" \t\n\r");
+							var str = new String(s);
+							if (whitespace.indexOf(str.charAt(0)) != -1) {
+								var j=0, i = str.length;
+								while (j < i && whitespace.indexOf(str.charAt(j)) != -1){
+									j++;
+								}
+								str = str.substring(j, i);
+							}
+							return str;
 						}
 						function trimRight(s){
-						if(s == null) return "";
-						var whitespace = new String(" \t\n\r");
-						var str = new String(s);
-						if (whitespace.indexOf(str.charAt(str.length-1)) != -1){
-						var i = str.length - 1;
-						while (i >= 0 && whitespace.indexOf(str.charAt(i)) != -1){
-						i--;
-						}
-						str = str.substring(0, i+1);
-						}
-						return str;
+							if(s == null) return "";
+							var whitespace = new String(" \t\n\r");
+							var str = new String(s);
+							if (whitespace.indexOf(str.charAt(str.length-1)) != -1){
+								var i = str.length - 1;
+								while (i >= 0 && whitespace.indexOf(str.charAt(i)) != -1){
+									i--;
+								}
+								str = str.substring(0, i+1);
+							}
+							return str;
 						}
 						var cookies=event.getParam('cookie').toString();
 						var arraycookies = cookies.split(";");
-						for(var i=0;i<arraycookies.length;i++)
-						{
-						var onecookie = arraycookies[i];
-						var arrayparam = onecookie.split("=");
-						if (arrayparam.length==2)
-						{
-						var paramname = trim(arrayparam[0]);
-
-						var paramvalue = trim(arrayparam[1]);
-
-						if (paramname=="JSESSIONID")
-						{
-						context.usersession.setValue(""+paramvalue);
-
-						break;
-						}
-						}
+						for(var i=0;i<arraycookies.length;i++){
+							var onecookie = arraycookies[i];
+							var arrayparam = onecookie.split("=");
+							if (arrayparam.length==2){
+								var paramname = trim(arrayparam[0]);
+		
+								var paramvalue = trim(arrayparam[1]);
+		
+								if (paramname=="JSESSIONID"){
+									context.usersession.setValue(""+paramvalue);
+			
+									break;
+								}
+							}
 						}
 						]]>
 					</script>
@@ -122,9 +119,9 @@
 			</if>
 
 			<!-- hu verification user and password-->
-			<if cond="context.requestpath.toString() == '/onos/ui/j_security_check'">
+			<if cond="context.requestpath.toString() == '/starface/ui/j_security_check'">
 				<then>
-					<log level="10">/onos/ui/j_security_check</log>
+					<log level="10">/starface/j_security_check</log>
 					<if cond="event.getParam('eventdata').toString()==''">
 						<then>
 							<exit/>
@@ -170,7 +167,7 @@
 											<log level="10">
 												<![CDATA[auth ok transportid= '<%=context.transportid.toString()%>']]>
 											</log>
-											<set name="httpparam" paramname="Location" value="'/onos/ui/index.html'"/>
+											<set name="httpparam" paramname="Location" value="'/starface/ui/index.html'"/>
 											<set name="sendjsessionid" value="context.randjsessionid()"/>
 											<set name="httpparam" paramname="Set-Cookie" value="'JSESSIONID='+context.sendjsessionid.toString()+'; path=/'"/>
 											<function name="CreateSession" class="SessionManager">
@@ -179,17 +176,17 @@
 													<string name="username" in="context.usernameparam.toString()"/>
 												</parameters>
 											</function>
-											<log level="10"> 197 CreateSession end</log>
+											
 											<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
 											<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
-											<log level="10"> 200 restfulserver</log>
+											
 										</function>
 
 									</then>
 									<else>
 										<log level="10">auth failure</log>
 										<function>
-											<set name="httpparam" paramname="Location" value="'/onos/ui/error.html'"/>
+											<set name="httpparam" paramname="Location" value="'/starface/ui/error.html'"/>
 											<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
 											<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 										</function>
@@ -200,7 +197,7 @@
 					</if>
 				</then>
 				<!-- hu get application contents-->
-				<elseif cond="context.requestpath.toString() == '/onos/ui/websock/core'">
+				<elseif cond="context.requestpath.toString() == '/starface/ui/websock/core'">
 					<function>
 						<if cond="event.getParam('Authorization')==''">
 							<then>
@@ -216,7 +213,7 @@
 										<log level="10">
 											<![CDATA[get a web socket connect= '<%=context.transportid.toString()%>']]>
 										</log>
-										<set name="httpparam" paramname="Location" value="'/onos/ui/login.html'"/>
+										<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
 										<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
 										<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 									</else>
@@ -243,12 +240,7 @@
 									context.passwordparam.setValue(password);
 									]]>
 								</script>
-								<log level="10">
-									<![CDATA[262行：username= '<%=context.usernameparam.toString()%>']]>
-								</log>
-								<log level="10">
-									<![CDATA[265行：password= '<%=context.passwordparam.toString()%>']]>
-								</log>
+
 								<reference variable="injson">
 									<jsonbody>
 										<![CDATA[
@@ -292,7 +284,7 @@
 						</if>
 					</function>
 			</elseif>
-				<elseif cond="context.requestpath.toString() == '/onos/ui/rs/logout'">
+				<elseif cond="context.requestpath.toString() == '/starface/ui/rs/logout'">
 					<function>
 						<!--hu!!!-->
 						<function name="RemoveSession" class="SessionManager">
@@ -303,17 +295,17 @@
 						<log level="10">
 							<![CDATA[get a web socket connect= '<%=context.transportid.toString()%>']]>
 						</log>
-						<set name="httpparam" paramname="Location" value="'/onos/ui/login.html'"/>
+						<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
 						<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
 						<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 					</function>
 				</elseif>
-				<elseif cond="context.requestpath.toString() == '/onos/ui/login.html'">
+				<elseif cond="context.requestpath.toString() == '/starface/ui/login.html'">
 					<function>
 						<script>
 							<![CDATA[
 							var x = context.requestpath.toString();
-							var filename="/opt/staros.xyz/starface/html/starface/ui"+x;
+							var filename="/opt/staros.xyz/starface/html"+x;
 							context.filepath.setValue(filename);
 							context.contenttype.setValue('text/html');
 							]]>
@@ -333,11 +325,11 @@
 				</elseif>
 				
 				
-				<elseif cond="context.requestpath.toString() == '/onos/ui/onos.js'">
+				<elseif cond="context.requestpath.toString() == '/starface/ui/onos.js'">
 					<function>
 						<script><![CDATA[
 							var x = context.requestpath.toString();
-							var filename="/opt/staros.xyz/staroscontroller/starlang/gui/gui"+x;
+							var filename="/opt/staros.xyz/starface/html"+x;
 							context.filepath.setValue(filename);
 							context.contenttype.setValue('text/javascript');
 						  ]]></script>
@@ -354,7 +346,7 @@
 								<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 							</then>
 							<else>
-								<set name="httpparam" paramname="Location" value="'/onos/ui/login.html'"/>
+								<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
 								<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
 								<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 							</else>
@@ -363,12 +355,12 @@
 				</elseif>
 				
 				
-				<elseif cond="context.requestpath.toString() == '/onos/ui/error.html'">
+				<elseif cond="context.requestpath.toString() == '/starface/ui/error.html'">
 					<function>
 						<script>
 							<![CDATA[
 							var x = context.requestpath.toString();
-							var filename="/opt/staros.xyz/starface/html/starface/ui"+x;
+							var filename="/opt/staros.xyz/starface/html"+x;
 							context.filepath.setValue(filename);
 							context.contenttype.setValue('text/html');
 							]]>
@@ -382,19 +374,19 @@
 						<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 					</function>
 				</elseif>
-				<elseif cond="context.requestpath.toString() == '/onos/ui/index.html'">
+				<elseif cond="context.requestpath.toString() == '/starface/ui/index.html'">
 					<function>
 						<script>
 							<![CDATA[
 							var x = context.requestpath.toString();
-							var filename="/opt/staros.xyz/starface/html/starface/ui"+x;
+							var filename="/opt/staros.xyz/starface/html"+x;
 							context.filepath.setValue(filename);
 							context.contenttype.setValue('text/html');
 							]]>
 						</script>
 						<if cond="context.sessionobj.getValue()==null">
 							<then>
-								<set name="httpparam" paramname="Location" value="'/onos/ui/login.html'"/>
+								<set name="httpparam" paramname="Location" value="'/starface/ui/login.html'"/>
 								<restful name="restfulserver" action="RESPONSE" status="301" text="Moved Temporarily" transportid="context.transportid.toString()" httpparams="httpparam"/>
 								<restful name="restfulserver" action="Disconnect" transportid="context.transportid.toString()"/>
 								<exit/>
@@ -406,9 +398,6 @@
 								<string name="username" out="context.username"/>
 							</parameters>
 						</function>
-						<log level="10">
-							<![CDATA[ send filepath= <%=context.filepath.toString()%>]]>
-						</log>
 						<set name="httpparam" paramname="Server" value="'StarOS.xyz'"/>
 						<set name="httpparam" paramname="Connection" value="'Close'"/>
 						<set name="httpparam" paramname="Content-Type" value="context.contenttype.toString()"/>
@@ -424,7 +413,7 @@
 					<script>
 						<![CDATA[
 						var x = context.requestpath.toString();
-						var filename="/opt/staros.xyz/starface/html/starface/ui"+x;
+						var filename="/opt/staros.xyz/starface/html"+x;
 						context.filepath.setValue(filename);
 						if(x.indexOf(".html") > 0 )
 						{
@@ -511,7 +500,7 @@
 				<!--hu!!!-->
 				<script><![CDATA[
 					var x = context.requestpath.toString();
-					 if (x.indexOf("/onos/ui/")>=0)
+					 if (x.indexOf("/starface/ui/")>=0)
 					{
 						context.isUi.setValue(true);
 					}
@@ -550,35 +539,202 @@
 			</function>
 		</onevent>
 		<onevent event="websocketopen">
-				<function>			
-					<log level="1"><![CDATA[ websocketopen event <%=event.getName()%>]]> </log>				
-					<log level="1"><![CDATA[ websocketopen transportid <%=event.getParam("transportid").toString()%>]]> </log>
-				</function>
-			</onevent>
-			<onevent event="websocketdisconnect">
-				<function>
-					
-					<log><![CDATA[ websocketdisconnect transportid <%=event.getParam("transportid").toString()%>]]> </log>
-					<!--remove name="websocketclients" value="event.getParam('transportid').toString()"/>-->
-				</function>
-			</onevent>
-			<onevent event="websocketdata">
-				<string name="jsontype"/>
-				<function>
+			<function>			
+				<log level="1"><![CDATA[ websocketopen event <%=event.getName()%>]]> </log>				
+				<log level="1"><![CDATA[ websocketopen transportid <%=event.getParam("transportid").toString()%>]]> </log>
+			</function>
+		</onevent>
+		<onevent event="websocketdisconnect">
+			<function>
+				
+				<log><![CDATA[ websocketdisconnect transportid <%=event.getParam("transportid").toString()%>]]> </log>
+				<!--remove name="websocketclients" value="event.getParam('transportid').toString()"/>-->
+			</function>
+		</onevent>
+		<onevent event="websocketdata">
+			<string name="type"/>
+			<function>
+				<script><![CDATA[
+					var info = JSON.parse(event.getParam("eventdata").toString());
+					context.print("559!!!!!!!!!!!!!!!!!!!!!"+event.getParam("eventdata").toString());
+					context.type.setValue(info.event);
+				]]></script>
+			</function>
+			<if cond="context.type.toString()=='updatePrefReq'">
+				<then>
+					<function name="updatePrefReq" class="TopoManager"/>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='requestSummary'">
+				<then>
+					<function name="requestSummary" class="TopoManager"/>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='topoStart'">
+				<then>
+					<function name="topoStart" class="TopoManager"/>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='requestDetails'">
+				<then>
+					<function name="requestDetails" class="TopoManager"/>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='devicemgrDataRequest'">
+				<then>
+					<log level="10">589 starfaceserverhttp ::后台收到devicemgrDataRequest请求</log>
+					<function name="SendAllSwitchToWebClient" class="switchManager"/>
+					<log level="10">591 starfaceserverhttp ::devicemgrDataRequest请求处理完成</log>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='addLink'">
+				<then>					
+					<string name="no"/>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcport"/>
+					<string name="dstport"/>
 					<script><![CDATA[
-						var info = JSON.parse(event.getParam("eventdata").toString());
-						context.jsontype.setValue(info.event);
+						var info = JSON.parse(event.getParam('eventdata').toString());
+						context.no.setValue(info.payload.no);
+						context.srcdevice.setValue(info.payload.srcdevice);
+						context.dstdevice.setValue(info.payload.dstdevice);
+						context.srcport.setValue(info.payload.srcport);
+						context.dstport.setValue(info.payload.dstport);
 					]]></script>
-				</function>
-			</onevent>
-			<onevent event="*">
-				<function>
-				<log level="1"><![CDATA[ invalid event <%=event.getName().toString()%>]]> </log>
-				<log level="1"><![CDATA[ invalid param <%=event.getParam("eventdata").toString()%>]]> </log>
-				</function>
-			</onevent>
+					<function name="addLink" class="LinkManager">
+						<parameters>
+							<string name="no" in="context.no.toString()"/>
+							<string name="srcdevice" in="context.srcdevice.toString()"/>
+							<string name="dstdevice" in="context.dstdevice.toString()"/>
+							<string name="srcport" in="context.srcport.toString()"/>
+							<string name="dstport" in="context.dstport.toString()"/>
+						</parameters>
+					</function>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='updateLink'">
+				<then>
+					<string name="no"/>
+					<string name="srcdevice"/>
+					<string name="dstdevice"/>
+					<string name="srcport"/>
+					<string name="dstport"/>
+					<script><![CDATA[
+						var info = JSON.parse(event.getParam('eventdata').toString());
+						context.no.setValue(info.payload.no);
+						context.srcdevice.setValue(info.payload.srcdevice);
+						context.dstdevice.setValue(info.payload.dstdevice);
+						context.srcport.setValue(info.payload.srcport);
+						context.dstport.setValue(info.payload.dstport);
+					]]></script>
+					<function name="updateLink" class="LinkManager">
+						<parameters>
+							<string name="no" in="context.no.toString()"/>
+							<string name="srcdevice" in="context.srcdevice.toString()"/>
+							<string name="dstdevice" in="context.dstdevice.toString()"/>
+							<string name="srcport" in="context.srcport.toString()"/>
+							<string name="dstport" in="context.dstport.toString()"/>
+						</parameters>
+					</function>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='deleteLink'">
+				<then>
+					<string name="no"/>
+					<script><![CDATA[
+						var info = JSON.parse(event.getParam('eventdata').toString());
+						context.no.setValue(info.payload.no);
+					]]></script>
+					<function name="deleteLink" class="LinkManager">
+						<parameters>
+							<string name="no" in="context.no.toString()"/>					
+						</parameters>
+					</function>
+					<exit/>
+				</then>
+			</if>
+			<if cond="context.type.toString()=='getLink'">
+				<then>
+					<string name="no"/>
+					<script><![CDATA[
+						var info = JSON.parse(event.getParam('eventdata').toString());
+						context.no.setValue(info.payload.no);
+					]]></script>
+					<function name="getLinkData" class="LinkManager">
+						<parameters>
+							<string name="no" in="context.no.toString()"/>					
+						</parameters>
+					</function>
+					<exit/>
+				</then>
+			</if>
+			<!-- wangkang 2017/11/02 -->
+			<if cond="context.type.toString()=='linkmgrDataRequest'">
+				<then>
+					<function name="SendAllLinkToWebClient" class="LinkManager"/>
+					<exit/>
+				</then>
+			</if>
+			<!--qiulei 20171103pm-->
+			<if cond="context.type.toString()=='iedsDataRequest'">
+				<then>
+					<function name="SendAllIEDSToWebClient" class="IEDSManager"/>
+					<exit/>
+				</then>
+			</if>
+			<!--qiulei 20171103pm start-->
+			<if cond="context.type.toString()=='deleteIeds'">
+				<then>
+					<function name="DeleteObjectFromIEDSManager" class="IEDSManager"/>
+					<exit/>
+				</then>
+			</if>
+			
+			
+			<if cond="context.type.toString()=='addIeds'">
+				<then>
+					<function name="AddIedsToIEDSManager" class="IEDSManager"/>
+					<exit/>
+				</then>
+			</if>
+			
+			<if cond="context.type.toString()=='updateIeds'">
+				<then>
+					<function name="UpdateIedsToIEDSManager" class="IEDSManager"/>
+					<exit/>
+				</then>
+			</if>
+			<!--qiulei 20171103pm end-->
+			
+			<if cond="context.type.toString()=='deletedevicemgrDataRequest'">
+				<then>
+					<function name="SendDeleteDeviceToWebClient" class="switchManager"/>
+					<exit/>
+				</then>
+			</if>
+			
+			
+			<if cond="context.type.toString()=='addDevicemgrDataRequest'">
+				<then>
+					<function name="SendAddDeviceToWebClient" class="switchManager"/>
+					<exit/>
+				</then>
+			</if>
+			
+		</onevent>
+		<onevent event="*">
+			<function>
+			<log level="1"><![CDATA[ invalid event <%=event.getName().toString()%>]]> </log>
+			<log level="1"><![CDATA[ invalid param <%=event.getParam("eventdata").toString()%>]]> </log>
+			</function>
+		</onevent>
 	</events>
-	
-	
-	
 </starlang>

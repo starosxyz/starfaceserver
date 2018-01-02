@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (C) 2013-2016 Nanjing StarOS Technology Co., Ltd
+	All rights reserved.
+	
+	@file 		restfulclient.xml
+	@brief 		
+	@version 	1.1.0
+	@auth 		YY
+	@date		2017/11/02
+	
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<!--StarOS Entry-->
+<starlang xmlns="http://www.staros.xyz/starcore/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" scope="application">
+	<function name="AddDataToController">
+		<parameters>
+			<string name="jsondata"/>
+			<string name="url"/>
+			<string name="outputdata"/>
+		</parameters>
+		<log level="100">*************insert AddDataToController****************</log>
+		<object name="clientrestful"/>
+		<params name="clientparam"/>
+		<set name="clientparam" paramname="url" value="context.url.toString()"/>
+		<set name="clientparam" paramname="connectedevent" value="'restfulconnected.event'"/>
+		<set name="clientparam" paramname="expectevent" value="'restfulresponse.event'"/>
+		<restful name="clientrestful" action="Client" params="clientparam"/>
+		<wait event="restfulconnected.event" timeout="3000" detachclass="true">
+			<function>
+				<log level="100">*************insert wait****************</log>
+				<log><![CDATA[AddDataToController restfulconnected event <%=event.getName()%>]]> </log>
+			</function>
+			<if cond="event.getParam('reason').toString()=='0'">
+				<then>
+					<restful name="clientrestful" action="REQUEST" method="post">
+						<jsonbody><![CDATA[
+							<%=context.jsondata.toString()%>
+						]]></jsonbody>
+					</restful>
+				</then>	
+				<else>
+					<exit/>
+				</else>
+			
+			</if>
+		</wait>
+		<wait event="restfulresponse.event" timeout="3000" detachclass="true">
+			<function>
+				<log level="100">*************insert 2nd wait****************</log>
+				<log level="100"><![CDATA[restfulclient AddDataToController outputdata = <%=event.getParam('eventdata').toString()%>]]></log>
+				<set name="outputdata" value="event.getParam('eventdata').toString()"/>
+			</function>
+		</wait>
+	</function>
+	<function name="DeleteDataToController">
+		<parameters>			
+			<string name="url"/>
+			<string name="data"/>
+		</parameters>
+		<object name="clientrestful"/>
+		<params name="clientparam"/>
+		<set name="clientparam" paramname="url" value="context.url.toString()"/>
+		<set name="clientparam" paramname="connectedevent" value="'restfulconnected.event'"/>
+		<set name="clientparam" paramname="expectevent" value="'restfulresponse.event'"/>
+		<restful name="clientrestful" action="Client" params="clientparam"/>
+		<wait event="restfulconnected.event" timeout="3000" detachclass="true">
+			<function>
+				<log><![CDATA[DeleteDataToController restfulconnected event <%=event.getName()%>]]> </log>				
+			</function>
+			<if cond="event.getParam('reason').toString()=='0'">
+				<then>
+					<restful name="clientrestful" action="REQUEST" method="delete"/>			
+				</then>
+				<else>
+					<exit/>
+				</else>
+			</if>
+				
+		</wait>
+
+		<wait event="restfulresponse.event" timeout="3000" detachclass="true">
+			<function>
+				
+				<log level="100"><![CDATA[data = <%=event.getParam('eventdata').toString()%>]]></log>
+				<set name="context.data" value="event.getParam('eventdata').toString()"/>
+			</function>	
+		</wait>
+	</function>
+	<function name="PutDataToController">
+		<parameters>
+			<string name="jsondata"/>
+			<string name="url"/>
+			<string name="outputdata"/>
+		</parameters>
+		<object name="clientrestful"/>
+		<params name="clientparam"/>
+		<set name="clientparam" paramname="url" value="context.url.toString()"/>
+		<set name="clientparam" paramname="connectedevent" value="'restfulconnected.event'"/>
+		<set name="clientparam" paramname="expectevent" value="'restfulresponse.event'"/>
+		<restful name="clientrestful" action="Client" params="clientparam"/>
+		<wait event="restfulconnected.event" timeout="3000" detachclass="true">
+			<function>
+				<log><![CDATA[PostDataToController restfulconnected event <%=event.getName()%>]]> </log>
+			</function>
+			<if cond="event.getParam('reason').toString()=='0'">
+				<then>
+					<restful name="clientrestful" action="REQUEST" method="put">
+						<jsonbody><![CDATA[
+							<%=context.jsondata.toString()%>
+						]]></jsonbody>
+					</restful>
+				</then>
+				<else>
+					<exit/>
+				</else>
+				
+			</if>
+			
+		</wait>
+		<wait event="restfulresponse.event" timeout="3000" detachclass="true">
+			<function>
+				<set name="outputdata" value="event.getParam('eventdata').toString()"/>
+			</function>
+		</wait>
+	</function>
+	<function name="PostDataToController">
+		<parameters>
+			<string name="jsondata"/>
+			<string name="url"/>
+		</parameters>
+		<object name="clientrestful"/>
+		<params name="clientparam"/>
+		<set name="clientparam" paramname="url" value="context.url.toString()"/>
+		<set name="clientparam" paramname="connectedevent" value="'restfulconnected.event'"/>
+		<set name="clientparam" paramname="expectevent" value="'restfulresponse.event'"/>
+		<restful name="clientrestful" action="Client" params="clientparam"/>
+		<wait event="restfulconnected.event" timeout="3000" detachclass="true">
+			<function>
+				<log><![CDATA[PostDataToController restfulconnected event <%=event.getName()%>]]> </log>
+			</function>
+			<if cond="event.getParam('reason').toString()=='0'">
+				<then>
+					<restful name="clientrestful" action="REQUEST" method="post">
+						<jsonbody><![CDATA[
+							<%=context.jsondata.toString()%>
+						]]></jsonbody>
+					</restful>
+				</then>
+				<else>
+					<exit/>
+				</else>
+			</if>
+
+		</wait>
+	</function>
+	<function name="GetDataFromController">
+		<parameters>
+			<string name="url"/>
+			<string name="eventdata"/>
+		</parameters>
+		<object name="clientrestful"/>
+		<log>Restfulclient</log>
+		<params name="clientparam"/>
+		<set name="clientparam" paramname="url" value="context.url.toString()"/>
+		<set name="clientparam" paramname="connectedevent" value="'restfulconnected.event'"/>
+		<set name="clientparam" paramname="expectevent" value="'restfulresponse.event'"/>
+		<restful name="clientrestful" action="Client" params="clientparam"/>
+		<wait event="restfulconnected.event" timeout="3000" detachclass="true">
+			<function>
+				<log><![CDATA[GetDataFromController restfulconnected event <%=event.getName()%>]]> </log>
+				<log level="100"><![CDATA[reason <%=event.getParam('reason').toString()%>]]> </log>
+			</function>
+			<if cond="event.getParam('reason').toString()=='0'">
+				<then>
+					<restful name="clientrestful" action="REQUEST" method="get"/>
+				</then>
+				<else>
+					<exit/>
+				</else>
+			</if>
+		</wait>
+		<wait event="restfulresponse.event" timeout="3000" detachclass="true">
+			<function>
+				<log level="100">****************************</log>
+				<log level="100"><![CDATA[restfulresponse event <%=event.getName()%>]]> </log>
+				<log level="100"><![CDATA[restfulresponse status '<%=event.getParam('status').toString()%>']]></log>
+				<log level="100"><![CDATA[restfulresponse content '<%=event.getParam('eventdata').toString()%>']]></log>
+				<set name="eventdata" value="event.getParam('eventdata').toString()"/>
+			</function>
+		</wait>
+	</function>
+</starlang>
